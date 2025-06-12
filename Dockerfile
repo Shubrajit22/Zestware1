@@ -1,4 +1,4 @@
-FROM  node:29
+FROM  node:22-alpine3.18
 
 WORKDIR /app
 
@@ -11,6 +11,7 @@ RUN npm install
 RUN npx prisma generate
 
 COPY . .
+
 
 EXPOSE 3000
 
