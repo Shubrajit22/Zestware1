@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  zestware:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://zestdb_owner:D5bBlSAgIUu7@ep-super-sunset-a1g7bfu6-pooler.ap-southeast-1.aws.neon.tech/zestdb?sslmode=require
+    command: >
+      sh -c "npx prisma migrate deploy && npx ts-node prisma/seed.ts && npm start"
