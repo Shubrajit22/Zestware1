@@ -1,8 +1,5 @@
 import { prisma } from '@/lib/prisma';
-import { NextRequest } from 'next/server';  // Removed NextResponse import
-import { writeFile } from 'fs/promises';
-import path from 'path';
-import { mkdirSync, existsSync } from 'fs';
+import { NextRequest } from 'next/server';
 
 // GET: Fetch all products
 export async function GET() {
@@ -22,56 +19,61 @@ export async function GET() {
   }
 }
 
-// POST: Create new product with local image upload
+// POST: Add a new product
 export async function POST(req: NextRequest) {
   try {
-    const formData = await req.formData();
+    const body = await req.json();
 
-    const imageFile = formData.get('image') as File;
-
-    let imageUrl = '';
-
-    if (imageFile) {
-      const buffer = Buffer.from(await imageFile.arrayBuffer());
-      const filename = `${Date.now()}-${imageFile.name}`;
-      const uploadDir = path.join(process.cwd(), 'public/uploads');
-
-      if (!existsSync(uploadDir)) {
-        mkdirSync(uploadDir, { recursive: true });
-      }
-
-      const filePath = path.join(uploadDir, filename);
-      await writeFile(filePath, buffer);
-
-      imageUrl = `/uploads/${filename}`;
-    }
-
-    const categoryId = formData.get('categoryId') as string;
-
-    const category = await prisma.productCategory.findUnique({
-      where: { id: categoryId },
-    });
-
-    if (!category) {
-      return new Response(JSON.stringify({ error: 'Category not found' }), { status: 400 });
-    }
+    const {
+      name,
+      description,
+      price,
+      mrpPrice,
+      discount,
+      imageUrl,
+      categoryId,
+      type,
+      state,
+      district,
+      institution,
+      color,
+      texture,
+      neckline,
+      sizeOptions,
+      stockImages,
+    } = body;
 
     const newProduct = await prisma.product.create({
       data: {
-        name: formData.get('name') as string,
-        description: formData.get('description') as string,
-        price: Number(formData.get('price')),
-        mrpPrice: Number(formData.get('mrpPrice')),
-        discount: Number(formData.get('discount')),
+        name,
+        description,
+        price,
+        mrpPrice,
+        discount,
         imageUrl,
         categoryId,
-        type: formData.get('type') as string,
-        state: formData.get('state') as string,
-        district: formData.get('district') as string,
-        institution: formData.get('institution') as string,
-        color: formData.get('color') as string,
-        texture: formData.get('texture') as string,
-        neckline: formData.get('neckline') as string,
+        type,
+        state,
+        district,
+        institution,
+        color,
+        texture,
+        neckline,
+        sizeOptions: {
+          create: sizeOptions?.map((s: any) => ({
+            size: s.size,
+            price: s.price,
+          })) || [],
+        },
+        stockImages: {
+          create: stockImages?.map((img: any) => ({
+            imageUrl: img.imageUrl,
+          })) || [],
+        },
+      },
+      include: {
+        sizeOptions: true,
+        stockImages: true,
       },
     });
 
@@ -82,7 +84,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// PUT: Update product (can keep this as-is for now unless you want to support image update)
+// PUT: Update product
 export async function PUT(req: Request) {
   try {
     const {
@@ -138,19 +140,33 @@ export async function PUT(req: Request) {
   }
 }
 
-// DELETE: Remove product
 export async function DELETE(req: Request) {
   try {
     const { id } = await req.json();
 
     const product = await prisma.product.findUnique({
       where: { id },
+      include: {
+        sizeOptions: true,
+        stockImages: true,
+      },
     });
 
     if (!product) {
       return new Response(JSON.stringify({ error: 'Product not found' }), { status: 404 });
     }
 
+    // Delete associated sizeOptions
+    await prisma.sizeOption.deleteMany({
+      where: { productId: id },
+    });
+
+    // Delete associated stockImages
+    await prisma.stockImage.deleteMany({
+      where: { productId: id },
+    });
+
+    // Now delete the product
     await prisma.product.delete({
       where: { id },
     });

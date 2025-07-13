@@ -21,19 +21,20 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // Define a background class here based on a condition (could be a prop or session state)
-  const backgroundClass = "bg-white-gradient"; // Example: use "bg-black-gradient" for dark theme
+  const backgroundClass = "bg-white-gradient";
 
   return (
     <html lang="en">
       <body className={`${poppins.variable} antialiased ${backgroundClass}`}>
         <SessionWrapper>
-        <CartContextProvider>
-          <div className="min-h-screen py-2">
-            <Navbar />
-            {children}
-            <Footer/>
-          </div>
+          <CartContextProvider>
+            <div className="min-h-screen flex flex-col">
+              <Navbar />
+              <main className="flex-grow">
+                {children}
+              </main>
+              <Footer />
+            </div>
           </CartContextProvider>
         </SessionWrapper>
       </body>

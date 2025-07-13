@@ -112,7 +112,7 @@ const CartPage = () => {
 
   return (
     <div className="bg-white-gradient min-h-screen container mx-auto p-6 flex flex-col">
-      <h1 className="text-4xl font-semibold text-center text-slate-100 mb-6">Your Cart</h1>
+      <h1 className="text-4xl font-semibold text-center text-slate-900 mb-6">Your Cart</h1>
       {loading ? (
         <div className="text-center text-xl">Loading...</div>
       ) : (
