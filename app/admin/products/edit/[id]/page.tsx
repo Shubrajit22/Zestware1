@@ -34,6 +34,38 @@ type Category = {
   name: string;
 };
 
+// Define the editable keys separately
+type EditableProductKey =
+  | 'name'
+  | 'description'
+  | 'price'
+  | 'mrpPrice'
+  | 'discount'
+  | 'imageUrl'
+  | 'type'
+  | 'state'
+  | 'district'
+  | 'institution'
+  | 'color'
+  | 'texture'
+  | 'neckline';
+
+const editableFields: [label: string, key: EditableProductKey][] = [
+  ['Name', 'name'],
+  ['Description', 'description'],
+  ['Price', 'price'],
+  ['MRP Price', 'mrpPrice'],
+  ['Discount', 'discount'],
+  ['Image URL', 'imageUrl'],
+  ['Type', 'type'],
+  ['State', 'state'],
+  ['District', 'district'],
+  ['Institution', 'institution'],
+  ['Color', 'color'],
+  ['Texture', 'texture'],
+  ['Neckline', 'neckline'],
+];
+
 export default function EditProductPage() {
   const router = useRouter();
   const { id } = useParams();
@@ -42,52 +74,51 @@ export default function EditProductPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
 
-useEffect(() => {
-  async function fetchData() {
-    try {
-      if (!id || typeof id !== 'string') return;
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        if (!id || typeof id !== 'string') return;
 
-      const productRes = await fetch(`/api/admin/products/${id}`);
-      if (!productRes.ok) throw new Error('Product not found');
-      const productData = await productRes.json();
-      setProduct(productData);
+        const productRes = await fetch(`/api/admin/products/${id}`);
+        if (!productRes.ok) throw new Error('Product not found');
+        const productData = await productRes.json();
+        setProduct(productData);
 
-      const catRes = await fetch(`/api/admin/categories`);
-      const categoryData = await catRes.json();
-      setCategories(categoryData);
-    } catch (e) {
-      console.error(e);
-      setError('Failed to load product');
-    } finally {
-      setLoading(false);
+        const catRes = await fetch(`/api/admin/categories`);
+        const categoryData = await catRes.json();
+        setCategories(categoryData);
+      } catch (e) {
+        console.error(e);
+        setError('Failed to load product');
+      } finally {
+        setLoading(false);
+      }
     }
-  }
 
-  fetchData();
-}, [id]);
+    fetchData();
+  }, [id]);
 
-
-  const handleInput = (key: keyof Product, value: any) => {
+  const handleInput = <K extends keyof Product>(
+  key: K,
+  value: Product[K]
+) => {
     if (!product) return;
     setProduct({ ...product, [key]: value });
   };
 
-const handleSizeChange = (
-  index: number,
-  field: keyof SizeOption,
-  value: string | number
-) => {
-  if (!product) return;
-  const updatedSizes = [...product.sizeOptions];
-
-  updatedSizes[index] = {
-    ...updatedSizes[index],
-    [field]: value,
+  const handleSizeChange = (
+    index: number,
+    field: keyof SizeOption,
+    value: string | number
+  ) => {
+    if (!product) return;
+    const updatedSizes = [...product.sizeOptions];
+    updatedSizes[index] = {
+      ...updatedSizes[index],
+      [field]: value,
+    };
+    setProduct({ ...product, sizeOptions: updatedSizes });
   };
-
-  setProduct({ ...product, sizeOptions: updatedSizes });
-};
-
 
   const handleImageChange = (index: number, value: string) => {
     if (!product) return;
@@ -118,34 +149,21 @@ const handleSizeChange = (
   };
 
   if (loading) return <p className="text-center">Loading product...</p>;
-  if (error || !product) return <p className="text-red-500">{error || 'Product not found'}</p>;
+  if (error || !product)
+    return <p className="text-red-500">{error || 'Product not found'}</p>;
 
   return (
     <div className="p-6 max-w-4xl mx-auto text-black">
       <h1 className="text-2xl font-bold mb-4">Edit Product</h1>
 
       <div className="space-y-4">
-        {[
-          ['Name', 'name'],
-          ['Description', 'description'],
-          ['Price', 'price'],
-          ['MRP Price', 'mrpPrice'],
-          ['Discount', 'discount'],
-          ['Image URL', 'imageUrl'],
-          ['Type', 'type'],
-          ['State', 'state'],
-          ['District', 'district'],
-          ['Institution', 'institution'],
-          ['Color', 'color'],
-          ['Texture', 'texture'],
-          ['Neckline', 'neckline'],
-        ].map(([label, key]) => (
+        {editableFields.map(([label, key]) => (
           <div key={key}>
             <label className="block font-semibold">{label}</label>
             <input
               className="w-full border p-2 rounded"
-              value={(product as any)[key]}
-              onChange={(e) => handleInput(key as keyof Product, e.target.value)}
+              value={product[key] ?? ''}
+              onChange={(e) => handleInput(key, e.target.value)}
             />
           </div>
         ))}
@@ -172,14 +190,18 @@ const handleSizeChange = (
               <input
                 placeholder="Size"
                 value={s.size}
-                onChange={(e) => handleSizeChange(index, 'size', e.target.value)}
+                onChange={(e) =>
+                  handleSizeChange(index, 'size', e.target.value)
+                }
                 className="border p-2 rounded w-1/2"
               />
               <input
                 placeholder="Price"
                 type="number"
                 value={s.price}
-                onChange={(e) => handleSizeChange(index, 'price', parseFloat(e.target.value))}
+                onChange={(e) =>
+                  handleSizeChange(index, 'price', parseFloat(e.target.value))
+                }
                 className="border p-2 rounded w-1/2"
               />
             </div>

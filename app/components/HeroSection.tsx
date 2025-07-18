@@ -1,5 +1,6 @@
 // components/HeroSection.tsx
 import React from "react";
+import SearchBarWithResults from "./search";
 
 const HeroSection = () => {
   return (
@@ -14,18 +15,11 @@ const HeroSection = () => {
       </p>
 
       {/* Search Bar */}
-      <div className="w-full">
-        <div className="flex items-center bg-white rounded-full p-1 shadow-md h-12 overflow-hidden">
-          <input
-            type="text"
-            placeholder="Search for Uniforms and More"
-            className="flex-grow min-w-0 px-4 text-black rounded-full outline-none"
-          />
-          <button className="flex-shrink-0 bg-black text-white px-5 py-2 rounded-full hover:bg-gray-800">
-            Search
-          </button>
-        </div>
-      </div>
+      <div className="w-full max-w-xl">
+  <SearchBarWithResults />
+</div>
+
+
     </div>
   );
 };

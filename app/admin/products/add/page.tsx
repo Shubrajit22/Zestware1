@@ -16,22 +16,23 @@ type SizeOption = {
 export default function AddProductPage() {
   const router = useRouter();
   const [categories, setCategories] = useState<Category[]>([]);
-  const [form, setForm] = useState({
-    name: '',
-    description: '',
-    price: '',
-    mrpPrice: '',
-    discount: '',
-    imageUrl: '',
-    categoryId: '',
-    type: '',
-    state: '',
-    district: '',
-    institution: '',
-    color: '',
-    texture: '',
-    neckline: '',
-  });
+  const [form, setForm] = useState<Record<string, string>>({
+  name: '',
+  description: '',
+  price: '',
+  mrpPrice: '',
+  discount: '',
+  imageUrl: '',
+  categoryId: '',
+  type: '',
+  state: '',
+  district: '',
+  institution: '',
+  color: '',
+  texture: '',
+  neckline: '',
+});
+
   const [sizeOptions, setSizeOptions] = useState<SizeOption[]>([]);
   const [stockImages, setStockImages] = useState<string[]>([]);
   const [error, setError] = useState('');
@@ -45,6 +46,7 @@ export default function AddProductPage() {
         setCategories(data);
       } catch (err) {
         setError('Failed to load categories');
+        console.log(err)
       }
     };
     fetchCategories();
@@ -119,7 +121,8 @@ export default function AddProductPage() {
           <input
             key={field}
             name={field}
-            value={(form as any)[field]}
+            value={form[field]}
+
             onChange={handleChange}
             placeholder={field}
             required={['name', 'price', 'mrpPrice', 'discount'].includes(field)}

@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { FaUserAlt } from 'react-icons/fa';
 import { MdShoppingCart, MdMoreVert } from 'react-icons/md';
 import { useEffect, useState } from 'react';
-
+import SearchBarWithResults from './search';
 export default function Navbar() {
   const router = useRouter();
   const { data: session } = useSession();
@@ -75,14 +75,10 @@ export default function Navbar() {
 
       {/* Desktop Search */}
       <div className="hidden md:flex flex-grow max-w-xs sm:max-w-md mx-6 bg-white rounded-full shadow-md p-1">
-        <input
-          type="text"
-          placeholder="Search for Uniforms and More"
-          className="flex-grow px-4 text-black rounded-full outline-none"
-        />
-        <button className="bg-black text-white px-5 py-2 rounded-full hover:bg-gray-800">
-          Search
-        </button>
+        <div className="w-full max-w-xl mx-auto">
+  <SearchBarWithResults />
+</div>
+
       </div>
 
       {/* Right section */}

@@ -38,7 +38,7 @@
     "next-env.d.ts",
     "types/next-auth.d.ts",
     ".next/types/**/*.ts",
-    "prisma", "src", "app/components/TShirtOrderingSystem.jsx",
+    "prisma", "src", "app/components/TShirtOrderingSystem.tsx",
   ],
  
   "exclude": [

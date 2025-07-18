@@ -1,8 +1,9 @@
 'use client'
 import { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
-import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import PaymentOptions from '../checkout/page';
+
 
 interface CartItem {
   id: string;
@@ -21,9 +22,9 @@ interface CartItem {
 }
 
 const CartPage = () => {
+  const [paymentMethod, setPaymentMethod] = useState<'card' | 'upi' | 'netbanking' | 'cod'>('card');
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-  const router = useRouter();
 
   // Fetch cart items from the API
   useEffect(() => {
@@ -104,12 +105,7 @@ const CartPage = () => {
   const calculateTotal = () => {
     return cartItems.reduce((total, item) => total + item.product.price * item.quantity, 0);
   };
-
-  // Handle Proceed to Checkout
-  const handleProceedToCheckout = () => {
-    router.push('/checkout');
-  };
-
+ 
   return (
     <div className="bg-white-gradient min-h-screen container mx-auto p-6 flex flex-col">
       <h1 className="text-4xl font-semibold text-center text-slate-900 mb-6">Your Cart</h1>
@@ -209,15 +205,36 @@ const CartPage = () => {
               <div className="text-right text-xl font-semibold text-slate-900 pl-4">₹{calculateTotal().toFixed(2)}</div>
             </div>
           )}
+          {cartItems.length > 0 && (
+  <div className="mt-10">
+    <h2 className="text-2xl font-semibold text-slate-900 mb-4">Choose Payment Method</h2>
+    <PaymentOptions 
+      paymentMethod={paymentMethod}
+      setPaymentMethod={setPaymentMethod}
+      totalAmount={calculateTotal()}
+    />
+  </div>
+)}
+
 
           {cartItems.length > 0 && (
             <div className="mt-6 flex justify-end items-center w-full">
               <button
-                onClick={handleProceedToCheckout}
-                className="py-3 bg-black text-white rounded-lg transition-all cursor-pointer w-1/4"
-              >
-                Proceed to Checkout
-              </button>
+  onClick={() => {
+    const paymentMessages = {
+      card: 'Processing card payment...',
+      upi: 'Redirecting to UPI app...',
+      netbanking: 'Redirecting to bank...',
+      cod: 'Order confirmed! Pay on delivery.'
+    };
+
+    alert(`${paymentMessages[paymentMethod]} Total: ₹${calculateTotal().toFixed(2)} (Demo only)`);
+  }}
+  className="py-3 bg-black text-white rounded-lg transition-all cursor-pointer w-1/4"
+>
+  {paymentMethod === 'cod' ? 'Confirm Order' : 'Pay Now'} – ₹{calculateTotal().toFixed(2)}
+</button>
+
             </div>
           )}
         </div>

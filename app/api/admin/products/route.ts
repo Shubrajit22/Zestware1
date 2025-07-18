@@ -1,7 +1,37 @@
 import { prisma } from '@/lib/prisma';
 import { NextRequest } from 'next/server';
 
-// GET: Fetch all products
+// Reusable interfaces for input validation
+interface SizeOptionInput {
+  size: string;
+  price: number;
+}
+
+interface StockImageInput {
+  imageUrl: string;
+}
+
+interface ProductRequestBody {
+  id?: string;
+  name: string;
+  description: string;
+  price: number;
+  mrpPrice: number;
+  discount: number;
+  imageUrl: string;
+  categoryId: string;
+  type: string;
+  state?: string;
+  district?: string;
+  institution?: string;
+  color?: string;
+  texture?: string;
+  neckline?: string;
+  sizeOptions?: SizeOptionInput[];
+  stockImages?: StockImageInput[];
+}
+
+// ✅ GET: Fetch all products
 export async function GET() {
   try {
     const products = await prisma.product.findMany({
@@ -19,10 +49,10 @@ export async function GET() {
   }
 }
 
-// POST: Add a new product
+// ✅ POST: Add a new product
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
+    const body: ProductRequestBody = await req.json();
 
     const {
       name,
@@ -39,8 +69,8 @@ export async function POST(req: NextRequest) {
       color,
       texture,
       neckline,
-      sizeOptions,
-      stockImages,
+      sizeOptions = [],
+      stockImages = [],
     } = body;
 
     const newProduct = await prisma.product.create({
@@ -60,15 +90,19 @@ export async function POST(req: NextRequest) {
         texture,
         neckline,
         sizeOptions: {
-          create: sizeOptions?.map((s: any) => ({
-            size: s.size,
-            price: s.price,
-          })) || [],
+          create: sizeOptions
+            .filter((s) => s.size && s.price)
+            .map((s) => ({
+              size: s.size,
+              price: s.price,
+            })),
         },
         stockImages: {
-          create: stockImages?.map((img: any) => ({
-            imageUrl: img.imageUrl,
-          })) || [],
+          create: stockImages
+            .filter((img) => img.imageUrl?.trim())
+            .map((img) => ({
+              imageUrl: img.imageUrl,
+            })),
         },
       },
       include: {
@@ -84,9 +118,11 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// PUT: Update product
+// ✅ PUT: Update product
 export async function PUT(req: Request) {
   try {
+    const body: ProductRequestBody = await req.json();
+
     const {
       id,
       name,
@@ -103,13 +139,17 @@ export async function PUT(req: Request) {
       color,
       texture,
       neckline,
-    } = await req.json();
+    } = body;
 
-    const category = await prisma.productCategory.findUnique({
+    if (!id) {
+      return new Response(JSON.stringify({ error: 'Product ID is required' }), { status: 400 });
+    }
+
+    const categoryExists = await prisma.productCategory.findUnique({
       where: { id: categoryId },
     });
 
-    if (!category) {
+    if (!categoryExists) {
       return new Response(JSON.stringify({ error: 'Category not found' }), { status: 400 });
     }
 
@@ -140,9 +180,15 @@ export async function PUT(req: Request) {
   }
 }
 
+// ✅ DELETE: Delete product and related data
 export async function DELETE(req: Request) {
   try {
-    const { id } = await req.json();
+    const body: { id: string } = await req.json();
+    const { id } = body;
+
+    if (!id) {
+      return new Response(JSON.stringify({ error: 'Product ID is required' }), { status: 400 });
+    }
 
     const product = await prisma.product.findUnique({
       where: { id },
@@ -156,17 +202,14 @@ export async function DELETE(req: Request) {
       return new Response(JSON.stringify({ error: 'Product not found' }), { status: 404 });
     }
 
-    // Delete associated sizeOptions
     await prisma.sizeOption.deleteMany({
       where: { productId: id },
     });
 
-    // Delete associated stockImages
     await prisma.stockImage.deleteMany({
       where: { productId: id },
     });
 
-    // Now delete the product
     await prisma.product.delete({
       where: { id },
     });

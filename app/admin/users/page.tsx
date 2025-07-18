@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Shield, Save } from 'lucide-react';
+import { Save } from 'lucide-react';
 
 type User = {
   id: string;

@@ -3,6 +3,7 @@ import ImageGallery from "./components/ImageGallery";
 import MostSelling from "./components/MostSelling";
 import { CategoryGrid } from './components/CategoryGrid';
 import Testimonials from "./components/Testimonials";
+import CustomizeCard from "./components/Customise";
 
 
 
@@ -37,6 +38,9 @@ export default async function Home() {
       <section className="w-full bg-white text-black py-12 px-4 md:px-20">
         <h1 className="text-center text-4xl font-bold mb-8">Product Categories</h1>
         <CategoryGrid />
+      </section>
+      <section>
+        <CustomizeCard/>
       </section>
       <section>
       <MostSelling products={mostSellingProducts} />

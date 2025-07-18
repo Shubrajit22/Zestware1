@@ -25,7 +25,7 @@ const Testimonials = () => {
 
   return (
     <div className="text-center py-12">
-      <p className="text-blue-600 font-medium underline">
+      <p className="text-slate-100 font-bold text-4xl ">
         Here are some of the best clients.
       </p>
       <h2 className="text-2xl font-bold mt-2 mb-8">What People Say About Us</h2>
@@ -42,10 +42,10 @@ const Testimonials = () => {
                 alt={t.name}
                 width={80}
                 height={80}
-                className="rounded-lg object-cover"
+                className="rounded-lg object-cover text-gray-600"
               />
               <div>
-                <h4 className="font-bold">{t.name}</h4>
+                <h4 className="font-bold text-gray-600">{t.name}</h4>
                 <p className="text-sm text-gray-600 mt-1">{t.text}</p>
                 <div className="text-yellow-500 mt-2">
                   {'★'.repeat(t.rating)}{'☆'.repeat(5 - t.rating)}

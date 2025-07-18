@@ -23,7 +23,7 @@ type Category = {
 
 const Products = () => {
   const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState<boolean>(true);
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [error, setError] = useState<string>('');
@@ -34,24 +34,23 @@ const Products = () => {
       setLoading(true);
       setError('');
       try {
-        // Fetching products
-        const res = await fetch('/api/admin/products');
-        if (!res.ok) throw new Error('Failed to fetch products');
-        const data = await res.json();
-        setProducts(data);
+        const [productsRes, categoriesRes] = await Promise.all([
+          fetch('/api/admin/products'),
+          fetch('/api/admin/categories'),
+        ]);
 
-        // Fetching categories from the API you defined
-        const categoriesRes = await fetch('/api/admin/categories');
+        if (!productsRes.ok) throw new Error('Failed to fetch products');
         if (!categoriesRes.ok) throw new Error('Failed to fetch categories');
-        const categoriesData = await categoriesRes.json();
+
+        const productsData: Product[] = await productsRes.json();
+        const categoriesData: Category[] = await categoriesRes.json();
+
+        setProducts(productsData);
         setCategories(categoriesData);
-      } catch (err: unknown) {
-        if (err instanceof Error) {
-          console.error('Error:', err.message);
-          setError(err.message || 'An error occurred');
-        } else {
-          setError('An unknown error occurred');
-        }
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'An unknown error occurred';
+        console.error('Error fetching data:', message);
+        setError(message);
       } finally {
         setLoading(false);
       }
@@ -66,15 +65,13 @@ const Products = () => {
     try {
       const res = await fetch('/api/admin/products', {
         method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id }),
       });
 
       if (!res.ok) throw new Error('Delete failed');
 
-      setProducts((prev) => prev.filter((product) => product.id !== id));
+      setProducts(prev => prev.filter(product => product.id !== id));
     } catch (err) {
       console.error('Delete error:', err);
       setError('Failed to delete product');
@@ -82,22 +79,23 @@ const Products = () => {
   };
 
   const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedCategory(e.target.value || null); // Handle null value for "All Categories"
+    setSelectedCategory(e.target.value || null);
   };
 
-  // Filter products if a category is selected
   const filteredProducts = selectedCategory
-    ? products.filter((product) => product.category?.id === selectedCategory)
+    ? products.filter(product => product.category?.id === selectedCategory)
     : products;
 
-  if (loading) return <p className="text-center">Loading products and categories...</p>;
+  if (loading) {
+    return <p className="text-center text-gray-600">Loading products and categories...</p>;
+  }
 
   return (
-    <div className="p-4 bg-white text-black">
+    <div className="p-4 bg-white text-black min-h-screen">
       {error && <p className="text-red-500 text-center mb-4">{error}</p>}
 
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-xl font-bold">Manage Products</h1>
+        <h1 className="text-2xl font-bold">Manage Products</h1>
         <button
           onClick={() => router.push('/admin/products/add')}
           className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
@@ -107,7 +105,7 @@ const Products = () => {
       </div>
 
       <div className="mb-4">
-        <label htmlFor="category" className="mr-2">Filter by Category:</label>
+        <label htmlFor="category" className="mr-2 font-medium">Filter by Category:</label>
         <select
           id="category"
           value={selectedCategory || ''}
@@ -115,41 +113,47 @@ const Products = () => {
           className="border rounded p-2"
         >
           <option value="">All Categories</option>
-          {categories.map((category) => (
+          {categories.map(category => (
             <option key={category.id} value={category.id}>
-              {category.name} {/* Only display the category name */}
+              {category.name}
             </option>
           ))}
         </select>
       </div>
 
       {filteredProducts.length === 0 ? (
-        <p>No products found in this category.</p>
+        <p className="text-gray-600">No products found in this category.</p>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {filteredProducts.map((product) => (
+          {filteredProducts.map(product => (
             <div
               key={product.id}
-              className="border rounded p-4 flex gap-4 items-center"
+              className="border rounded p-4 flex gap-4 items-center shadow-sm hover:shadow-md transition"
             >
-              {product.imageUrl && (
+              {product.imageUrl ? (
                 <Image
                   src={product.imageUrl}
                   alt={product.name}
-                  width={96} // Set the width you need
-                  height={96} // Set the height you need
+                  width={96}
+                  height={96}
                   className="object-cover rounded"
                 />
+              ) : (
+                <div className="w-24 h-24 bg-gray-200 flex items-center justify-center text-gray-500 text-xs rounded">
+                  No image
+                </div>
               )}
+
               <div className="flex-1">
                 <h2 className="text-lg font-semibold">{product.name}</h2>
                 <p className="text-sm text-gray-600">
-                  ₹{product.price} • {product.type}
+                  ₹{product.price} {product.type && `• ${product.type}`}
                 </p>
                 {product.category?.name && (
                   <p className="text-xs text-gray-500">Category: {product.category.name}</p>
                 )}
               </div>
+
               <div className="flex flex-col gap-2">
                 <button
                   onClick={() => router.push(`/admin/products/edit/${product.id}`)}
