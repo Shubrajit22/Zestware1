@@ -1,32 +1,59 @@
-'use client'
+'use client';
 import { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import Image from 'next/image';
-import PaymentOptions from '../checkout/page';
-
+import { useRouter } from 'next/navigation';
 
 interface CartItem {
   id: string;
   product: {
+    id: string;
     name: string;
     price: number;
     imageUrl: string;
     description: string;
     sizeOptions: {
+      id: string;
       size: string;
       price: number;
-    }[];  // Ensure size options are populated
+    }[];
   };
   quantity: number;
-  selectedSize: string; // Store selected size here
+  size: string;
+  sizeId?: string | null;
+}
+
+interface RazorpayResponse {
+  razorpay_payment_id: string;
+  razorpay_order_id: string;
+  razorpay_signature?: string;
 }
 
 const CartPage = () => {
-  const [paymentMethod, setPaymentMethod] = useState<'card' | 'upi' | 'netbanking' | 'cod'>('card');
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const [user, setUser] = useState<{ name: string; email: string; mobile: string } | null>(null);
+  const [selectedAddress, setSelectedAddress] = useState<string>('');
 
-  // Fetch cart items from the API
+  const router = useRouter();
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await fetch('/api/me');
+        const data = await res.json();
+        if (res.ok && data.user) {
+          setUser(data.user);
+        } else {
+          toast.error('User not logged in');
+        }
+      } catch {
+        toast.error('Could not get user info');
+      }
+    };
+    fetchUser();
+  }, []);
+
   useEffect(() => {
     const fetchCartItems = async () => {
       setLoading(true);
@@ -38,48 +65,51 @@ const CartPage = () => {
         } else {
           toast.error(data.message || 'Error fetching cart items');
         }
-      } catch (error) {
-        console.error('Error fetching cart items:', error);
+      } catch {
         toast.error('An error occurred while fetching cart items');
       } finally {
         setLoading(false);
       }
     };
-
     fetchCartItems();
   }, []);
 
-  // Handle quantity update
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.async = true;
+    document.body.appendChild(script);
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
+
   const handleUpdateQuantity = async (itemId: string, newQuantity: number) => {
     setLoading(true);
     setCartItems((prev) =>
       prev.map((item) =>
         item.id === itemId ? { ...item, quantity: newQuantity } : item
       )
-    ); // Optimistic UI update
-
+    );
     try {
       const response = await fetch('/api/cart', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ itemId, newQuantity }),
       });
-
       const data = await response.json();
-      if (response.ok) {
-        toast.success('Cart updated successfully');
-      } else {
+      if (!response.ok) {
         toast.error(data.message || 'Error updating cart');
+      } else {
+        toast.success('Cart updated successfully');
       }
-    } catch (error) {
-      console.error('Error updating cart:', error);
+    } catch {
       toast.error('An error occurred while updating cart');
     } finally {
       setLoading(false);
     }
   };
 
-  // Handle item removal
   const handleRemoveItem = async (itemId: string) => {
     setLoading(true);
     try {
@@ -93,19 +123,99 @@ const CartPage = () => {
       } else {
         toast.error(data.message || 'Error removing item');
       }
-    } catch (error) {
-      console.error('Error removing item:', error);
+    } catch {
       toast.error('An error occurred while removing item');
     } finally {
       setLoading(false);
     }
   };
 
-  // Calculate the total price
   const calculateTotal = () => {
-    return cartItems.reduce((total, item) => total + item.product.price * item.quantity, 0);
+    return cartItems.reduce(
+      (total, item) => total + item.product.price * item.quantity,
+      0
+    );
   };
- 
+
+  const handlePaymentSuccess = async (response: RazorpayResponse) => {
+    try {
+      if (!selectedAddress) {
+        toast.error('Please select a shipping address.');
+        return;
+      }
+
+      const orderPayload = {
+        razorpay_payment_id: response.razorpay_payment_id,
+        razorpay_order_id: response.razorpay_order_id,
+        email: user?.email,
+        name: user?.name,
+        amount: calculateTotal(),
+        address: selectedAddress,
+        items: cartItems.map((item) => ({
+          name: item.product.name,
+          quantity: item.quantity,
+          price: item.product.price,
+          size: item.size,
+          productId: item.product.id,
+          sizeId: item.sizeId || null,
+        })),
+      };
+
+      const res = await fetch('/api/order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(orderPayload),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        toast.success('✅ Order placed successfully!');
+        router.push('/orders');
+      } else {
+        toast.error(data.message || '❌ Order failed.');
+      }
+    } catch {
+      toast.error('Something went wrong.');
+    }
+  };
+
+  const handleRazorpayPayment = async () => {
+    const res = await fetch('/api/razorpay', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ amount: calculateTotal() }),
+    });
+
+    const data = await res.json();
+
+    const options = {
+      key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
+      amount: data.amount,
+      currency: 'INR',
+      name: 'ZESTWARE',
+      description: 'Order Payment',
+      image: '/logo.png',
+      order_id: data.id,
+      handler: function (response: RazorpayResponse) {
+        handlePaymentSuccess(response);
+      },
+      prefill: {
+        name: user?.name || 'Customer',
+        email: user?.email || '',
+        contact: user?.mobile || '',
+      },
+      theme: {
+        color: '#000',
+      },
+    };
+
+    const rzp = new window.Razorpay(options);
+    rzp.open();
+  };
+
   return (
     <div className="bg-white-gradient min-h-screen container mx-auto p-6 flex flex-col">
       <h1 className="text-4xl font-semibold text-center text-slate-900 mb-6">Your Cart</h1>
@@ -131,39 +241,10 @@ const CartPage = () => {
                 <div className="flex-1 space-y-4">
                   <h2 className="text-2xl font-semibold text-gray-800">{item.product.name}</h2>
                   <p className="text-sm text-gray-500">{item.product.description}</p>
-                  <p className="text-lg text-gray-700">Size: {item.selectedSize}</p> {/* Display selected size */}
-
-                  {/* Check if size options exist and display them */}
-                  {item.product.sizeOptions && item.product.sizeOptions.length > 0 ? (
-                    <select
-                    value={item.selectedSize}
-                    onChange={(e) => {
-                      const newSize = e.target.value;
-                      const selectedOption = item.product.sizeOptions.find(option => option.size === newSize);
-                      const newPrice = selectedOption ? selectedOption.price : item.product.price;
-                  
-                      setCartItems((prevItems) =>
-                        prevItems.map((cartItem) =>
-                          cartItem.id === item.id 
-                            ? { ...cartItem, selectedSize: newSize, product: { ...cartItem.product, price: newPrice } } 
-                            : cartItem
-                        )
-                      );
-                    }}
-                    className="mt-2 p-2 border rounded w-40 text-gray-900"
-                  >
-                    {item.product.sizeOptions.map((sizeOption) => (
-                      <option key={sizeOption.size} value={sizeOption.size}>
-                        {sizeOption.size} - ₹{sizeOption.price.toFixed(2)}
-                      </option>
-                    ))}
-                  </select>
-                  
-                  ) : (
-                    <p className="text-sm text-gray-600">No size options available</p>
-                  )}
-
-                  <p className="text-lg font-semibold text-gray-900">Price: ₹{(item.product.price).toFixed(2)}</p>
+                  <p className="text-lg text-gray-700">Size: {item.size}</p>
+                  <p className="text-lg font-semibold text-gray-900">
+                    Price: ₹{item.product.price.toFixed(2)}
+                  </p>
                 </div>
 
                 <div className="flex flex-col items-end space-y-4 w-1/4">
@@ -187,12 +268,7 @@ const CartPage = () => {
                     onClick={() => handleRemoveItem(item.id)}
                     className="text-slate-100 font-medium transition cursor-pointer"
                   >
-                    <Image
-                      src={'/images/remove.png'}
-                      alt="remove"
-                      width={30}
-                      height={30}
-                    />
+                    <Image src="/images/remove.png" alt="remove" width={30} height={30} />
                   </button>
                 </div>
               </div>
@@ -202,39 +278,33 @@ const CartPage = () => {
           {cartItems.length > 0 && (
             <div className="mt-6 flex justify-between items-center text-2xl font-bold text-slate-900">
               <h3 className="ml-auto">Total:</h3>
-              <div className="text-right text-xl font-semibold text-slate-900 pl-4">₹{calculateTotal().toFixed(2)}</div>
+              <div className="text-right text-xl font-semibold text-slate-900 pl-4">
+                ₹{calculateTotal().toFixed(2)}
+              </div>
             </div>
           )}
-          {cartItems.length > 0 && (
-  <div className="mt-10">
-    <h2 className="text-2xl font-semibold text-slate-900 mb-4">Choose Payment Method</h2>
-    <PaymentOptions 
-      paymentMethod={paymentMethod}
-      setPaymentMethod={setPaymentMethod}
-      totalAmount={calculateTotal()}
-    />
-  </div>
-)}
-
 
           {cartItems.length > 0 && (
-            <div className="mt-6 flex justify-end items-center w-full">
+            <div className="mt-10">
+              <h2 className="text-2xl font-semibold text-slate-900 mb-4">Proceed to Payment</h2>
+              <div className="mb-6">
+                <label className="block text-gray-700 text-lg font-medium mb-2">
+                  Shipping Address
+                </label>
+                <textarea
+                  className="w-full p-3 border rounded text-gray-800"
+                  rows={3}
+                  placeholder="Enter your shipping address here"
+                  value={selectedAddress}
+                  onChange={(e) => setSelectedAddress(e.target.value)}
+                />
+              </div>
               <button
-  onClick={() => {
-    const paymentMessages = {
-      card: 'Processing card payment...',
-      upi: 'Redirecting to UPI app...',
-      netbanking: 'Redirecting to bank...',
-      cod: 'Order confirmed! Pay on delivery.'
-    };
-
-    alert(`${paymentMessages[paymentMethod]} Total: ₹${calculateTotal().toFixed(2)} (Demo only)`);
-  }}
-  className="py-3 bg-black text-white rounded-lg transition-all cursor-pointer w-1/4"
->
-  {paymentMethod === 'cod' ? 'Confirm Order' : 'Pay Now'} – ₹{calculateTotal().toFixed(2)}
-</button>
-
+                onClick={handleRazorpayPayment}
+                className="py-3 bg-black text-white rounded-lg transition-all cursor-pointer w-1/3"
+              >
+                Pay with Razorpay – ₹{calculateTotal().toFixed(2)}
+              </button>
             </div>
           )}
         </div>

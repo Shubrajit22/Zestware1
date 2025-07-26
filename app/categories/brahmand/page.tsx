@@ -30,7 +30,7 @@ export default async function BrahmandPage() {
   }));
 
   return (
-    <div className="container mx-auto p-4 bg-white-gradient">
+    <div className="h-screen p-4 bg-white-gradient">
       <h1 className="text-3xl font-bold text-center mb-8 mt-10 text-black">ब्रह्मांड</h1>
       <ProductGridClient products={products} />
     </div>

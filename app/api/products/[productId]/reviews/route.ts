@@ -36,13 +36,21 @@ export async function POST(
     }
 
     const review = await prisma.review.create({
-      data: {
-        rating,
-        comment,
-        userId,
-        productId,
+  data: {
+    comment,
+    rating,
+    userId,
+    productId,
+  },
+  include: {
+    user: {
+      select: {
+        name: true,
+        image: true,
       },
-    })
+    },
+  },
+});
 
     return NextResponse.json(review, { status: 201 })
   } catch (error) {

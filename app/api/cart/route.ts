@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { Prisma } from '@prisma/client';
 // GET: Fetch cart items
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -16,13 +17,31 @@ export async function GET() {
       include: {
         product: {
           include: {
-            sizeOptions: true, // Ensure sizeOptions are included
-          }
+            sizeOptions: true, // Optional: If you want to show available sizes too
+          },
         },
       },
     });
 
-    return NextResponse.json({ cartItems }, { status: 200 });
+    // Transform cartItems to include selected size at top level
+   const transformedCartItems = cartItems.map(
+  (item: Prisma.CartItemGetPayload<{ include: { product: { include: { sizeOptions: true } } } }>) => ({
+    id: item.id,
+    quantity: item.quantity,
+    size: item.size,
+    product: {
+      id: item.product.id,
+      name: item.product.name,
+      description: item.product.description,
+      imageUrl: item.product.imageUrl,
+      sizeOptions: item.product.sizeOptions,
+      price: item.product.price,
+    },
+  })
+);
+
+
+    return NextResponse.json({ cartItems: transformedCartItems }, { status: 200 });
   } catch (error) {
     console.error('GET /api/cart error:', error);
     return NextResponse.json({ message: 'Error fetching cart items' }, { status: 500 });

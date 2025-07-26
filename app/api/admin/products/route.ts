@@ -1,5 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { NextRequest } from 'next/server';
+import { ProductType } from '@prisma/client';
+
 
 // Reusable interfaces for input validation
 interface SizeOptionInput {
@@ -82,7 +84,7 @@ export async function POST(req: NextRequest) {
         discount,
         imageUrl,
         categoryId,
-        type,
+        type: type as ProductType,
         state,
         district,
         institution,
@@ -163,7 +165,7 @@ export async function PUT(req: Request) {
         discount,
         imageUrl,
         categoryId,
-        type,
+        type: type as ProductType,
         state,
         district,
         institution,

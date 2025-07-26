@@ -286,24 +286,25 @@ return (
             <div key={review.id} className="border p-4 rounded-lg">
               <div className="flex items-center gap-4">
                 <Image
-                  src={review.user?.image || '/images/fallback-user.png'}
-                  alt={review.user.name}
-                  width={40}
-                  height={40}
-                  className="rounded-full"
-                />
+  src={review.user?.image || '/images/fallback-user.png'}
+  alt={review.user?.name || 'User Avatar'}
+  width={40}
+  height={40}
+  className="rounded-full"
+/>
                 <div>
-                  <p className="font-semibold">{review.user.name}</p>
-                  <div className="flex">
-                    {Array(5)
-                      .fill(0)
-                      .map((_, idx) => (
-                        <span key={idx} className={review.rating > idx ? 'text-yellow-500' : 'text-gray-300'}>
-                          ★
-                        </span>
-                      ))}
-                  </div>
-                </div>
+  <p className="font-semibold">{review.user?.name || 'Anonymous'}</p>
+  <div className="flex">
+    {Array(5)
+      .fill(0)
+      .map((_, idx) => (
+        <span key={idx} className={review.rating > idx ? 'text-yellow-500' : 'text-gray-300'}>
+          ★
+        </span>
+      ))}
+  </div>
+</div>
+
               </div>
               <p className="mt-2">{review.comment}</p>
             </div>

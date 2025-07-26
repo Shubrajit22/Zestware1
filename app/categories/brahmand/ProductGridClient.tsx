@@ -33,7 +33,7 @@ export default function ProductGridClient({ products }: { products: Product[] })
   return (
     <>
       {/* Selection cards */}
-      <div className="grid grid-cols-2 gap-4 mb-6">
+      <div className="grid grid-cols-2 gap-4 mb-6 w-full">
         <div
           className={`cursor-pointer border p-4 rounded-lg shadow-xl ${selectedType === "TSHIRT" ? "bg-black text-slate-100" : "bg-transparent text-slate-900"}`}
           onClick={() => handleSelection("TSHIRT")}

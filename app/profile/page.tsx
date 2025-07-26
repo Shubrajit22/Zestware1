@@ -109,44 +109,6 @@ export default function ProfilePage() {
 
   const renderContent = () => {
     switch (selectedSection) {
-      case 'orders':
-        return (
-          <div className="bg-white p-6 rounded-lg shadow-lg ">
-            <h1 className="text-2xl font-semibold mb-4 text-black">Your Orders</h1>
-            {user.orders && user.orders.length > 0 ? (
-              <ul className="space-y-4">
-                {user.orders.map((order) => (
-                  <li key={order.id} className="p-4 bg-gray-50 rounded-lg shadow-sm hover:bg-gray-100">
-                    <div className="flex justify-between"><span>Order ID:</span><span>{order.id}</span></div>
-                    <div className="flex justify-between"><span>Status:</span><span>{order.status}</span></div>
-                    <div className="flex justify-between"><span>Total:</span><span>${order.totalAmount.toFixed(2)}</span></div>
-                    <div className="flex justify-between"><span>Shipping Address:</span><span>{order.shippingAddress}</span></div>
-                    <div className="mt-2">
-                      <h3 className="font-semibold">Items:</h3>
-                      <ul>
-                        {order.orderItems.map(item => (
-                          <li key={item.id} className="flex justify-between">
-                            <div className="flex items-center gap-2">
-                              <Image src={`/api/products/${item.productId}/image`} alt="product" width={48} height={48} />
-                              <div>
-                                <div>Product ID: {item.productId}</div>
-                                <div>Size: {item.size}</div>
-                                <div>Price: ${item.price.toFixed(2)}</div>
-                              </div>
-                            </div>
-                            <div>Qty: {item.quantity}</div>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <div>No orders found.</div>
-            )}
-          </div>
-        )
       case 'profile':
         return (
           <div className="bg-white p-6 rounded-lg shadow-lg">
@@ -210,7 +172,6 @@ export default function ProfilePage() {
 
         <nav className="space-y-4">
           <div className={`px-4 py-2 rounded cursor-pointer ${selectedSection === 'profile' ? 'bg-blue-100 text-blue-700' : 'hover:bg-gray-100'}`} onClick={() => setSelectedSection('profile')}>Profile</div>
-          <div className={`px-4 py-2 rounded cursor-pointer ${selectedSection === 'orders' ? 'bg-blue-100 text-blue-700' : 'hover:bg-gray-100'}`} onClick={() => setSelectedSection('orders')}>Orders</div>
           <div className={`px-4 py-2 rounded cursor-pointer ${selectedSection === 'addresses' ? 'bg-blue-100 text-blue-700' : 'hover:bg-gray-100'}`} onClick={() => setSelectedSection('addresses')}>Addresses</div>
 
           {isAdmin && (

@@ -4,29 +4,27 @@ import MostSelling from "./components/MostSelling";
 import { CategoryGrid } from './components/CategoryGrid';
 import Testimonials from "./components/Testimonials";
 import CustomizeCard from "./components/Customise";
-
-
+import { prisma } from '@/lib/prisma';
+import { Product } from '@prisma/client'; // ✅ Import Prisma type
 
 export default async function Home() {
-  let mostSellingProducts;
+  let mostSellingProducts: Product[] = []; // ✅ Explicitly type it
+
   try {
     mostSellingProducts = await prisma.product.findMany({
       orderBy: {
-        salesCount: 'desc', // Assuming `salesCount` is a field that tracks sales
+        salesCount: 'desc', // Assuming `salesCount` exists
       },
-      take: 6, // Limit the number of products displayed
+      take: 6,
     });
   } catch (error) {
     console.error("Error fetching most selling products:", error);
-    mostSellingProducts = []; // Default to empty array in case of error
   }
 
   return (
     <>
-      <main className=" text-white">
+      <main className="text-white">
         <div className="px-6 md:px-20 py-2 min-h-screen">
-          
-
           <div className="flex flex-col md:flex-row justify-between items-center gap-12 mt-24">
             <HeroSection />
             <ImageGallery />
@@ -34,21 +32,22 @@ export default async function Home() {
         </div>
       </main>
 
-      {/* Full-width white background section */}
       <section className="w-full bg-white text-black py-12 px-4 md:px-20">
         <h1 className="text-center text-4xl font-bold mb-8">Product Categories</h1>
         <CategoryGrid />
       </section>
+
       <section>
-        <CustomizeCard/>
-      </section>
-      <section>
-      <MostSelling products={mostSellingProducts} />
-      </section>
-      <section>
-        <Testimonials/>
+        <CustomizeCard />
       </section>
 
+      <section>
+        <MostSelling products={mostSellingProducts} />
+      </section>
+
+      <section>
+        <Testimonials />
+      </section>
     </>
   );
 }
