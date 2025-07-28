@@ -1,0 +1,85 @@
+import { NextRequest, NextResponse } from 'next/server';
+import nodemailer from 'nodemailer';
+import bcrypt from 'bcryptjs';
+
+const otpStore: { [email: string]: string } = {}; // In-memory store
+const otpExpiry: { [email: string]: number } = {};
+
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
+
+// STEP 1: Send OTP
+export async function POST(req: NextRequest) {
+  try {
+    const { email } = await req.json();
+
+    if (!email) {
+      return NextResponse.json({ message: 'Email is required' }, { status: 400 });
+    }
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    otpStore[email] = otp;
+    otpExpiry[email] = Date.now() + 5 * 60 * 1000; // OTP valid for 5 minutes
+
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: 'Your OTP for password reset',
+      text: `Your OTP is: ${otp}`,
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    return NextResponse.json({ message: 'OTP sent to email' });
+  } catch (error) {
+    console.error('OTP sending error:', error);
+    return NextResponse.json({ message: 'Error sending OTP' }, { status: 500 });
+  }
+}
+
+export async function PUT(req: NextRequest) {
+  try {
+    const { email, otp, newPassword } = await req.json();
+
+    if (!email || !otp || !newPassword) {
+      return NextResponse.json({ message: 'All fields are required' }, { status: 400 });
+    }
+
+    const storedOtp = otpStore[email];
+    const expiry = otpExpiry[email];
+
+    if (!storedOtp || !expiry || Date.now() > expiry) {
+      return NextResponse.json({ message: 'OTP expired or not found' }, { status: 400 });
+    }
+
+    if (storedOtp !== otp) {
+      return NextResponse.json({ message: 'Invalid OTP' }, { status: 400 });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // ✅ Update the user's password in the database
+    const updatedUser = await prisma.user.update({
+      where: { email },
+      data: { password: hashedPassword },
+    });
+
+    if (!updatedUser) {
+      return NextResponse.json({ message: 'User not found or update failed' }, { status: 404 });
+    }
+
+    // Cleanup
+    delete otpStore[email];
+    delete otpExpiry[email];
+
+    return NextResponse.json({ message: 'Password reset successful' });
+  } catch (error) {
+    console.error('Password reset error:', error);
+    return NextResponse.json({ message: 'Server error' }, { status: 500 });
+  }
+}

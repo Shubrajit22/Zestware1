@@ -69,7 +69,7 @@ export default function Navbar() {
       <Link href={'/'}>
       <div className="flex items-center space-x-4">
         <Image src="/home/logo.png" alt="Logo" width={40} height={40} className="rounded-full" />
-        <h1 className="text-md md:text-2xl font-bold">Zestware India</h1>
+        <h1 className="text-md md:text-2xl font-bold">Zestwear India</h1>
       </div>
       </Link>
 
@@ -84,9 +84,9 @@ export default function Navbar() {
       {/* Right section */}
       <div className="flex items-center space-x-4">
         <div className="hidden md:flex space-x-6 text-lg flex-grow justify-between">
-          <Link href="/" className="hover:text-gray-400">Home</Link>
-          <Link href="/contact" className="hover:text-gray-400">Contact</Link>
-          <Link href="/about" className="hover:text-gray-400">About</Link>
+          <Link href="/" className="hover:text-yellow-400">Home</Link>
+          <Link href="/contact" className="hover:text-yellow-400">Contact</Link>
+          <Link href="/about" className="hover:text-yellow-400">About</Link>
           <div className="mr-6" />
         </div>
 
@@ -106,14 +106,14 @@ export default function Navbar() {
             ) : (
               <FaUserAlt
                 size={22}
-                className="cursor-pointer hover:text-gray-400"
+                className="cursor-pointer hover:text-yellow-400"
                 onClick={handleProfileClick}
               />
             )
           ) : (
             <FaUserAlt
               size={22}
-              className="cursor-pointer hover:text-gray-400"
+              className="cursor-pointer hover:text-yellow-400"
               onClick={handleSignInClick}
             />
           )}
@@ -122,13 +122,13 @@ export default function Navbar() {
           {isProfileOpen && session?.user && (
   <div className="absolute right-0 mt-2 w-40 bg-white text-black rounded-md shadow-lg z-50">
     <button
-      className="w-full text-left px-4 py-2 hover:bg-gray-200"
+      className="w-full text-left px-4 py-2 hover:text-yellow-400 "
       onClick={() => router.push('/profile')}
     >
       My Profile
     </button>
     <button
-      className="w-full text-left px-4 py-2 hover:bg-gray-200"
+      className="w-full text-left px-4 py-2 hover:text-yellow-400"
       onClick={() => router.push('/orders')}
     >
       My Orders
@@ -146,7 +146,7 @@ export default function Navbar() {
 
         {/* Cart */}
         <div className="relative cursor-pointer" onClick={() => router.push('/cart')}>
-          <MdShoppingCart size={26} className="hover:text-gray-400" />
+          <MdShoppingCart size={26} className="hover:text-yellow-400" />
           {loadingCart ? (
             <span className="absolute -top-2 -right-2 text-xs bg-red-600 text-white rounded-full px-1">
               ...
@@ -173,20 +173,13 @@ export default function Navbar() {
       {/* Mobile Menu */}
       {isMenuOpen && (
         <div className="absolute top-16 left-1/2 transform -translate-x-1/2 bg-black text-white p-4 rounded-lg shadow-lg border border-gray-600 w-[90vw] max-w-sm z-50 md:hidden">
-          <Link href="#home" className="block py-2 hover:text-gray-400">Home</Link>
-          <Link href="#contact" className="block py-2 hover:text-gray-400">Contact</Link>
-          <Link href="#about" className="block py-2 hover:text-gray-400">About</Link>
+          <Link href="#home" className="block py-2 hover:text-yellow-400">Home</Link>
+          <Link href="#contact" className="block py-2 hover:text-yellow-400">Contact</Link>
+          <Link href="#about" className="block py-2 hover:text-yellow-400">About</Link>
 
           <div className="mt-4">
             <div className="flex items-center bg-white rounded-full px-2 py-1 shadow-inner">
-              <input
-                type="text"
-                placeholder="Search uniforms..."
-                className="flex-grow px-3 py-1 text-black bg-transparent outline-none rounded-full"
-              />
-              <button className="bg-black text-white px-4 py-1.5 text-sm rounded-full hover:bg-gray-800">
-                Search
-              </button>
+              <SearchBarWithResults />
             </div>
           </div>
         </div>

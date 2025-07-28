@@ -1,17 +1,18 @@
 'use client';
 import { useSession } from 'next-auth/react';
 import { useState, useEffect } from 'react';
-import { useCart } from '../../components/CartContextProvider'; // Ensure correct import
+import { useCart } from '../../components/CartContextProvider';
 import Image from 'next/image';
 import Link from 'next/link';
+import { toast } from 'react-hot-toast';
 
 interface Product {
   id: string;
   name: string;
   price: number;
-  stockImages: { imageUrl: string }[]; 
+  stockImages: { imageUrl: string }[];
   imageUrl: string;
-  sizeOptions: { size: string; price: number }[]; 
+  sizeOptions: { size: string; price: number }[];
   category: string;
   mrpPrice?: number;
   description: string;
@@ -39,19 +40,28 @@ export default function ProductPageContent({
 }) {
   const { addToCart } = useCart();
   const { data: session } = useSession();
-  const [reviews, setReviews] = useState<Review[]>(initialReviews || []); 
+  const [reviews, setReviews] = useState<Review[]>(initialReviews || []);
   const [isLoadingReviews, setIsLoadingReviews] = useState<boolean>(false);
   const [errorFetchingReviews, setErrorFetchingReviews] = useState<string>('');
   const [newReview, setNewReview] = useState<string>('');
   const [newRating, setNewRating] = useState<number>(0);
   const fallbackImage = '/images/fallback-image.jpg';
 
-  // Product image handling
-  const getValidImage = (src: unknown) => typeof src === 'string' && src.trim() !== '' ? src : fallbackImage;
-  const allImages = product.stockImages.length > 0 ? product.stockImages.map((img) => getValidImage(img.imageUrl)) : [getValidImage(product.imageUrl)];
+  const getValidImage = (src: string | undefined | null): string => {
+    if (typeof src === 'string' && src.trim().startsWith('http')) {
+      return src;
+    }
+    return fallbackImage;
+  };
+
+  const allImages = product.stockImages.length > 0
+    ? product.stockImages.map((img) => getValidImage(img.imageUrl))
+    : [getValidImage(product.imageUrl)];
 
   const [mainImage, setMainImage] = useState<string>(getValidImage(product.imageUrl));
-  const [stockImages, setStockImages] = useState<string[]>(allImages.filter((img) => img !== getValidImage(product.imageUrl)));
+  const [stockImages, setStockImages] = useState<string[]>(
+    allImages.filter((img) => img !== getValidImage(product.imageUrl))
+  );
 
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const selectedSizeOption = product.sizeOptions?.find((opt) => opt.size === selectedSize);
@@ -64,11 +74,18 @@ export default function ProductPageContent({
 
   const handleAddToCart = async () => {
     if (!selectedSize) {
-      alert('Please select a size!');
+      toast.error('Please select a size!');
       return;
     }
 
-    const productToAdd = { id: product.id, name: product.name, price: displayedPrice, imageUrl: mainImage, quantity: 1, size: selectedSize };
+    const productToAdd = {
+      id: product.id,
+      name: product.name,
+      price: displayedPrice,
+      imageUrl: mainImage,
+      quantity: 1,
+      size: selectedSize,
+    };
 
     addToCart(productToAdd);
 
@@ -80,17 +97,19 @@ export default function ProductPageContent({
       });
       const data = await res.json();
       if (!res.ok) {
-        console.error('Error adding to cart:', data.message);
-        alert(data.message || 'Failed to add to cart');
+        toast.error(data.message || 'Failed to add to cart');
+      } else {
+        toast.success('Added to cart successfully!');
       }
     } catch (error) {
+      toast.error('An error occurred while adding the item to the cart');
       console.error('Error sending cart data:', error);
-      alert('An error occurred while adding the item to the cart');
     }
   };
 
   const relatedCategoryProducts = relatedProducts.filter(
-    (relatedProduct) => relatedProduct.category?.toLowerCase() === product.category?.toLowerCase()
+    (relatedProduct) =>
+      relatedProduct.category?.toLowerCase() === product.category?.toLowerCase()
   );
 
   useEffect(() => {
@@ -108,6 +127,7 @@ export default function ProductPageContent({
       } catch (error) {
         console.error('Error fetching reviews:', error);
         setErrorFetchingReviews('Failed to fetch reviews.');
+        toast.error('Failed to load reviews');
       } finally {
         setIsLoadingReviews(false);
       }
@@ -117,12 +137,12 @@ export default function ProductPageContent({
 
   const handleReviewSubmit = async () => {
     if (!newReview || newRating === 0) {
-      alert('Please provide a comment and rating.');
+      toast.error('Please provide both a comment and a rating.');
       return;
     }
 
     if (!session?.user?.id) {
-      alert('You must be logged in to leave a review');
+      toast.error('You must be logged in to leave a review.');
       return;
     }
 
@@ -130,19 +150,24 @@ export default function ProductPageContent({
       const res = await fetch(`/api/products/${product.id}/reviews`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ comment: newReview, rating: newRating, userId: session.user.id }),
+        body: JSON.stringify({
+          comment: newReview,
+          rating: newRating,
+          userId: session.user.id,
+        }),
       });
       const data = await res.json();
       if (res.ok) {
-        setReviews((prevReviews) => [data, ...prevReviews]); // Add new review to the start of the list
+        setReviews((prevReviews) => [data, ...prevReviews]);
         setNewReview('');
         setNewRating(0);
+        toast.success('Review submitted!');
       } else {
-        alert('Error submitting review');
+        toast.error(data.message || 'Error submitting review');
       }
     } catch (error) {
       console.error('Error submitting review:', error);
-      alert('An error occurred while submitting your review');
+      toast.error('An error occurred while submitting your review');
     }
   };
 
@@ -154,12 +179,13 @@ return (
       <div className="w-full md:w-1/2 flex flex-col items-center gap-4">
         <div className="w-full sm:w-[300px] md:w-[400px] h-[300px] sm:h-[300px] md:h-[400px] border-2 border-black p-2 rounded-md flex items-center justify-center">
           <Image
-            src={mainImage || fallbackImage}
+            src={getValidImage(mainImage)}
             alt={product.name || 'Product Image'}
             width={400}
             height={400}
             className="rounded object-cover w-full h-full"
           />
+
         </div>
 
         {/* Thumbnails */}
@@ -168,14 +194,13 @@ return (
             <button key={index} onClick={() => handleImageChange(thumb)}>
               <div className="w-[70px] h-[70px] border rounded-md overflow-hidden">
                 <Image
-                  src={thumb || fallbackImage}
-                  alt={`Thumbnail ${index + 1}`}
-                  width={80}
-                  height={80}
-                  className={`object-cover w-full h-full transition ${
-                    mainImage === thumb ? 'ring-2 ring-black' : 'border border-gray-300'
-                  }`}
-                />
+  src={getValidImage(thumb)}
+  alt={`Thumbnail ${index + 1}`}
+  width={80}
+  height={80}
+  className="object-cover w-full h-full"
+/>
+
               </div>
             </button>
           ))}
@@ -256,12 +281,13 @@ return (
               className="w-full bg-white rounded-md shadow-lg p-4"
             >
               <Image
-                src={getValidImage(relatedProduct.imageUrl)}
-                alt={relatedProduct.name}
-                width={250}
-                height={250}
-                className="object-cover w-full h-60 rounded-md"
-              />
+  src={getValidImage(relatedProduct.imageUrl)}
+  alt={relatedProduct.name}
+  width={250}
+  height={250}
+  className="object-cover w-full h-60 rounded-md"
+/>
+
               <h3 className="font-semibold text-base sm:text-lg mt-2">{relatedProduct.name}</h3>
               <p className="text-gray-600 text-sm mt-1">₹ {relatedProduct.price}</p>
             </Link>

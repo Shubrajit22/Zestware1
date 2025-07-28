@@ -5,6 +5,8 @@ import SessionWrapper from "./components/sessionwrapper";
 import Navbar from "./components/Navbar";
 import { CartContextProvider } from "./components/CartContextProvider";
 import Footer from "./components/Footer";
+import { Toaster } from 'react-hot-toast';
+
 const poppins = Poppins({
   variable: "--font-poppins", // Custom variable for Poppins font
   subsets: ["latin"],
@@ -32,6 +34,7 @@ export default function RootLayout({
               <Navbar />
               <main className="flex-grow">
                 {children}
+                <Toaster position="top-center" reverseOrder={false} />
               </main>
               <Footer />
             </div>

@@ -16,7 +16,7 @@ const CustomizeCard = () => {
           Personalize your order with your own colors, text, and design. Stand out with your own unique creation.
         </p>
         <Link href="/Customise">
-          <button className="bg-white text-black px-6 py-3 rounded-full font-semibold hover:bg-gray-900 transition">
+          <button className="bg-white text-black px-6 py-3 rounded-full font-semibold hover:bg-yellow-400 hover:text-white transition hover:cursor-pointer">
             Start Customizing
           </button>
         </Link>

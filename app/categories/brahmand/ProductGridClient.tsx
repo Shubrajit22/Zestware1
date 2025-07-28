@@ -65,12 +65,14 @@ export default function ProductGridClient({ products }: { products: Product[] })
                   {/* Image */}
                   <div className="w-48 h-48 rounded-lg overflow-hidden mb-4">
                     <Image
-                      src={product.imageUrl}
-                      alt={product.name}
-                      width={500}
-                      height={500}
-                      className="object-cover w-full h-full"
-                    />
+  src={product.imageUrl || "/fallback.jpg"} // Use a fallback image
+  alt={product.name}
+  width={500}
+  height={500}
+  className="object-cover w-full h-full"
+  unoptimized // ⬅ Optional: avoids image optimization issues
+/>
+
                   </div>
 
                   {/* Name */}

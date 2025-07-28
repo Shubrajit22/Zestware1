@@ -9,6 +9,7 @@ type Product = {
   name: string;
   price: number;
   imageUrl?: string;
+  stockImages?: { imageUrl: string }[];
   type?: string;
   category?: {
     id: string;
@@ -45,7 +46,7 @@ const Products = () => {
         const productsData: Product[] = await productsRes.json();
         const categoriesData: Category[] = await categoriesRes.json();
 
-        setProducts(productsData);
+        setProducts(productsData.sort((a, b) => a.name.localeCompare(b.name)));
         setCategories(categoriesData);
       } catch (err) {
         const message = err instanceof Error ? err.message : 'An unknown error occurred';
@@ -125,51 +126,58 @@ const Products = () => {
         <p className="text-gray-600">No products found in this category.</p>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {filteredProducts.map(product => (
-            <div
-              key={product.id}
-              className="border rounded p-4 flex gap-4 items-center shadow-sm hover:shadow-md transition"
-            >
-              {product.imageUrl ? (
-                <Image
-                  src={product.imageUrl}
-                  alt={product.name}
-                  width={96}
-                  height={96}
-                  className="object-cover rounded"
-                />
-              ) : (
-                <div className="w-24 h-24 bg-gray-200 flex items-center justify-center text-gray-500 text-xs rounded">
-                  No image
-                </div>
-              )}
+          {filteredProducts.map(product => {
+            const imageSrc =
+              product.imageUrl ||
+              product.stockImages?.[0]?.imageUrl ||
+              '/placeholder.jpg';
 
-              <div className="flex-1">
-                <h2 className="text-lg font-semibold">{product.name}</h2>
-                <p className="text-sm text-gray-600">
-                  ₹{product.price} {product.type && `• ${product.type}`}
-                </p>
-                {product.category?.name && (
-                  <p className="text-xs text-gray-500">Category: {product.category.name}</p>
+            return (
+              <div
+                key={product.id}
+                className="border rounded p-4 flex gap-4 items-center shadow-sm hover:shadow-md transition"
+              >
+                {imageSrc.startsWith('http') ? (
+                  <Image
+                    src={imageSrc}
+                    alt={product.name}
+                    width={96}
+                    height={96}
+                    className="object-cover rounded"
+                  />
+                ) : (
+                  <div className="w-24 h-24 bg-gray-200 flex items-center justify-center text-gray-500 text-xs rounded">
+                    No image
+                  </div>
                 )}
-              </div>
 
-              <div className="flex flex-col gap-2">
-                <button
-                  onClick={() => router.push(`/admin/products/edit/${product.id}`)}
-                  className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600"
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={() => handleDelete(product.id)}
-                  className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
-                >
-                  Delete
-                </button>
+                <div className="flex-1">
+                  <h2 className="text-lg font-semibold">{product.name}</h2>
+                  <p className="text-sm text-gray-600">
+                    ₹{product.price} {product.type && `• ${product.type}`}
+                  </p>
+                  {product.category?.name && (
+                    <p className="text-xs text-gray-500">Category: {product.category.name}</p>
+                  )}
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <button
+                    onClick={() => router.push(`/admin/products/edit/${product.id}`)}
+                    className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(product.id)}
+                    className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

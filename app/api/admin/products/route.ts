@@ -2,7 +2,6 @@ import { prisma } from '@/lib/prisma';
 import { NextRequest } from 'next/server';
 import { ProductType } from '@prisma/client';
 
-
 // Reusable interfaces for input validation
 interface SizeOptionInput {
   size: string;
@@ -29,8 +28,20 @@ interface ProductRequestBody {
   color?: string;
   texture?: string;
   neckline?: string;
+
+  // Existing size data (for display only)
   sizeOptions?: SizeOptionInput[];
+
+  // Existing image data (for display only)
   stockImages?: StockImageInput[];
+
+  // To add
+  newSizeOptions?: SizeOptionInput[];
+  newStockImages?: StockImageInput[];
+
+  // To selectively delete
+  deletedSizeOptionIds?: string[];
+  deletedStockImageIds?: string[];
 }
 
 // ✅ GET: Fetch all products
@@ -141,6 +152,10 @@ export async function PUT(req: Request) {
       color,
       texture,
       neckline,
+      newSizeOptions = [],
+      deletedSizeOptionIds = [],
+      newStockImages = [],
+      deletedStockImageIds = [],
     } = body;
 
     if (!id) {
@@ -155,6 +170,52 @@ export async function PUT(req: Request) {
       return new Response(JSON.stringify({ error: 'Category not found' }), { status: 400 });
     }
 
+    // 🔥 Delete selected size options
+    if (deletedSizeOptionIds.length > 0) {
+      await prisma.sizeOption.deleteMany({
+        where: {
+          id: { in: deletedSizeOptionIds },
+          productId: id,
+        },
+      });
+    }
+
+    // ✨ Add new size options
+    if (newSizeOptions.length > 0) {
+      await prisma.sizeOption.createMany({
+        data: newSizeOptions.map((size) => ({
+          productId: id,
+          size: size.size,
+          price: size.price,
+        })),
+      });
+    }
+
+    // 🗑️ Delete selected images
+    if (deletedStockImageIds.length > 0) {
+      await prisma.stockImage.deleteMany({
+        where: {
+          id: { in: deletedStockImageIds },
+          productId: id,
+        },
+      });
+    }
+
+    // ✅ Normalize and create new stock images (type-safe)
+    const normalizedStockImages: StockImageInput[] = newStockImages.filter(
+      (img): img is StockImageInput => !!img.imageUrl?.trim()
+    );
+
+    if (normalizedStockImages.length > 0) {
+      await prisma.stockImage.createMany({
+        data: normalizedStockImages.map((img) => ({
+          productId: id,
+          imageUrl: img.imageUrl,
+        })),
+      });
+    }
+
+    // ⚙️ Update main product
     const updatedProduct = await prisma.product.update({
       where: { id },
       data: {
@@ -173,6 +234,10 @@ export async function PUT(req: Request) {
         texture,
         neckline,
       },
+      include: {
+        sizeOptions: true,
+        stockImages: true,
+      },
     });
 
     return new Response(JSON.stringify(updatedProduct), { status: 200 });
@@ -182,7 +247,7 @@ export async function PUT(req: Request) {
   }
 }
 
-// ✅ DELETE: Delete product and related data
+// ✅ DELETE: Delete product and associated data
 export async function DELETE(req: Request) {
   try {
     const body: { id: string } = await req.json();
@@ -204,17 +269,9 @@ export async function DELETE(req: Request) {
       return new Response(JSON.stringify({ error: 'Product not found' }), { status: 404 });
     }
 
-    await prisma.sizeOption.deleteMany({
-      where: { productId: id },
-    });
-
-    await prisma.stockImage.deleteMany({
-      where: { productId: id },
-    });
-
-    await prisma.product.delete({
-      where: { id },
-    });
+    await prisma.sizeOption.deleteMany({ where: { productId: id } });
+    await prisma.stockImage.deleteMany({ where: { productId: id } });
+    await prisma.product.delete({ where: { id } });
 
     return new Response(null, { status: 204 });
   } catch (error) {

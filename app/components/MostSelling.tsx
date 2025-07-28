@@ -43,18 +43,21 @@ export default function MostSelling({ products }: MostSellingProps) {
                 <h3 className="text-lg font-semibold text-center mb-1 text-black">{product.name}</h3>
 
                 {/* Rating */}
-                {[...Array(5)].map((_, index) => (
-                  <span
-                    key={index}
-                    className={`${
-                      product.rating && product.rating > index
-                        ? 'text-yellow-400'
-                        : 'text-gray-300'
-                    }`}
-                  >
-                    ★
-                  </span>
-                ))}
+                <div className="flex flex-row space-x-1">
+                  {[...Array(5)].map((_, index) => (
+                    <span
+                      key={index}
+                      className={`${
+                        product.rating && product.rating > index
+                          ? 'text-yellow-400'
+                          : 'text-gray-300'
+                                                        
+                      }`}
+                    >
+                      ★
+                    </span>
+                  ))}
+                </div>
 
 
                 {/* MRP and Price in the same line */}
