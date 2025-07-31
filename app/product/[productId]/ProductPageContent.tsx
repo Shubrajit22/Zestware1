@@ -16,7 +16,9 @@ interface Product {
   category: string;
   mrpPrice?: number;
   description: string;
+  rating?: number | null; // ← add this
 }
+
 
 interface Review {
   id: string;
@@ -46,6 +48,13 @@ export default function ProductPageContent({
   const [newReview, setNewReview] = useState<string>('');
   const [newRating, setNewRating] = useState<number>(0);
   const fallbackImage = '/images/fallback-image.jpg';
+  // derive average rating from the reviews
+  const reviewCount = reviews.length;
+  const averageRating =
+    reviewCount > 0
+      ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviewCount
+      : null;
+  const roundedAvg = averageRating ? Math.round(averageRating * 10) / 10 : null;
 
   const getValidImage = (src: string | undefined | null): string => {
     if (typeof src === 'string' && src.trim().startsWith('http')) {
@@ -208,65 +217,120 @@ return (
       </div>
 
       {/* Right: Product Info */}
-      <div className="w-full md:w-1/2 flex flex-col gap-6">
-        <h1 className="text-3xl sm:text-4xl font-bold">{product.name}</h1>
-        <p className="text-gray-700 text-base sm:text-lg">{product.description}</p>
+<div className="w-full md:w-1/2 flex flex-col gap-6">
+  <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">{product.name}</h1>
 
-        {/* Price */}
-        <div className="flex items-center gap-4">
-          {product.mrpPrice && (
-            <p className="text-lg sm:text-xl font-semibold line-through text-gray-500">
-              ₹ {product.mrpPrice}
+  <div className="flex items-center gap-4 flex-wrap">
+  {/* Rating summary from reviews */}
+  <div className="flex items-center gap-2">
+    <div className="flex">
+      {[...Array(5)].map((_, i) => (
+        <span
+          key={i}
+          className={`text-sm ${
+            averageRating && averageRating > i ? 'text-yellow-400' : 'text-gray-300'
+          }`}
+          aria-hidden="true"
+        >
+          ★
+        </span>
+      ))}
+    </div>
+    {roundedAvg !== null ? (
+      <span className="text-sm text-gray-500 ml-2">
+        {roundedAvg} ({reviewCount} review{reviewCount > 1 ? 's' : ''})
+      </span>
+    ) : (
+      <span className="text-sm text-gray-500 ml-2">No reviews yet</span>
+    )}
+  </div>
+
+  {/* Optional badge */}
+  <div className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">
+    Best Seller
+  </div>
+</div>
+
+
+  <p className="text-gray-600 text-sm sm:text-base leading-relaxed">{product.description}</p>
+
+  {/* Pricing */}
+  <div className="flex flex-col sm:flex-row sm:items-end sm:gap-6 gap-2">
+    <div className="flex items-baseline gap-3">
+      {product.mrpPrice && displayedPrice && product.mrpPrice > displayedPrice ? (
+        <>
+          <p className="text-lg sm:text-xl font-medium line-through text-gray-400">
+            ₹{product.mrpPrice.toFixed(0)}
+          </p>
+          <div className="flex items-center gap-2">
+            <p className="text-2xl sm:text-3xl font-bold text-black">
+              ₹{displayedPrice.toFixed(0)}
             </p>
-          )}
-          <p className="text-xl sm:text-2xl font-semibold">₹ {displayedPrice}</p>
-        </div>
-
-        {/* Discount */}
-        {product.mrpPrice && displayedPrice && product.mrpPrice > displayedPrice && (
-          <div className="text-base sm:text-lg text-green-600">
-            Save {Math.round(((product.mrpPrice - displayedPrice) / product.mrpPrice) * 100)}% off
+            <span className="inline-block bg-red-100 text-red-700 text-xs font-semibold px-2 py-1 rounded-full">
+              {Math.round(((product.mrpPrice - displayedPrice) / product.mrpPrice) * 100)}% OFF
+            </span>
           </div>
-        )}
-
-        {/* Size selection */}
-        <div className="space-y-2">
-          <label className="font-semibold block text-base sm:text-lg">Size:</label>
-          <div className="flex flex-wrap gap-3">
-            {product.sizeOptions.length > 0 ? (
-              product.sizeOptions.map((opt) => (
-                <button
-                  key={opt.size}
-                  onClick={() => setSelectedSize(opt.size)}
-                  className={`cursor-pointer px-4 py-2 border rounded-md text-sm sm:text-base hover:bg-black hover:text-white ${
-                    selectedSize === opt.size ? 'bg-black text-white' : ''
-                  }`}
-                >
-                  {opt.size}
-                </button>
-              ))
-            ) : (
-              <p>No sizes available</p>
-            )}
-          </div>
-        </div>
-
-        {/* Action buttons */}
-        <div className="flex flex-wrap gap-4 mt-6">
-          <button
-            onClick={handleAddToCart}
-            className={`cursor-pointer px-6 sm:px-8 py-2 sm:py-3 border rounded-md text-base sm:text-lg ${
-              !selectedSize ? 'bg-slate-100' : 'bg-black text-white'
-            }`}
-            disabled={!selectedSize}
-          >
-            Add to cart
-          </button>
-          <button className="cursor-pointer border px-6 sm:px-8 py-2 sm:py-3 bg-white text-black rounded-md text-base sm:text-lg">
-            Buy Now
-          </button>
-        </div>
+        </>
+      ) : (
+        <p className="text-2xl sm:text-3xl font-bold text-black">
+          ₹{displayedPrice.toFixed(0)}
+        </p>
+      )}
+    </div>
+    {product.mrpPrice && displayedPrice && product.mrpPrice > displayedPrice && (
+      <div className="text-sm text-green-600">
+        You save ₹{(product.mrpPrice - displayedPrice).toFixed(0)}
       </div>
+    )}
+  </div>
+
+  {/* Size selection */}
+  <div className="space-y-2">
+    <label className="font-semibold block text-sm sm:text-base">Size:</label>
+    <div className="flex flex-wrap gap-2">
+      {product.sizeOptions.length > 0 ? (
+        product.sizeOptions.map((opt) => (
+          <button
+            key={opt.size}
+            onClick={() => setSelectedSize(opt.size)}
+            className={`relative flex items-center justify-center px-4 py-2 text-sm font-medium rounded-full border transition-all ${
+              selectedSize === opt.size
+                ? 'bg-black text-white shadow-md'
+                : 'bg-white text-gray-800 hover:bg-gray-100'
+            } focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-black`}
+            aria-pressed={selectedSize === opt.size}
+          >
+            {opt.size}
+          </button>
+        ))
+      ) : (
+        <p className="text-sm text-gray-500">No sizes available</p>
+      )}
+    </div>
+  </div>
+
+  {/* Add to Cart button */}
+  <div className="mt-6">
+    <button
+      onClick={handleAddToCart}
+      disabled={!selectedSize}
+      className={`w-full flex justify-center px-6 py-3 rounded-md text-base font-semibold transition hover:cursor-pointer ${
+        !selectedSize
+          ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+          : 'bg-black text-white hover:opacity-95 hover:bg-yellow-500'
+      }`}
+    >
+      Add to Cart
+    </button>
+  </div>
+
+  {/* Trust / secondary info */}
+  <div className="text-sm text-gray-500 mt-2 space-y-1">
+    <p>Free shipping on orders above ₹999.</p>
+    <p>30-day hassle-free returns.</p>
+  </div>
+</div>
+
     </div>
 
     {/* Related Products */}
@@ -299,88 +363,157 @@ return (
     </div>
 
     {/* Reviews Section */}
-    <div className="w-full py-8 mt-10 px-4 sm:px-6 md:px-10">
-      <h2 className="text-2xl sm:text-3xl font-bold text-center mb-6">Customer Reviews</h2>
+<div className="w-full py-8 mt-10 px-4 sm:px-6 md:px-10">
+  <h2 className="text-2xl sm:text-3xl font-bold text-center mb-6">Customer Reviews</h2>
 
-      {isLoadingReviews ? (
-        <div className="text-center text-lg sm:text-xl">Loading reviews...</div>
-      ) : errorFetchingReviews ? (
-        <div className="text-center text-xl text-red-600">{errorFetchingReviews}</div>
-      ) : reviews.length > 0 ? (
-        <div className="space-y-4">
-          {reviews.map((review) => (
-            <div key={review.id} className="border p-4 rounded-lg">
-              <div className="flex items-center gap-4">
-                <Image
-  src={review.user?.image || '/images/fallback-user.png'}
-  alt={review.user?.name || 'User Avatar'}
-  width={40}
-  height={40}
-  className="rounded-full"
-/>
-                <div>
-  <p className="font-semibold">{review.user?.name || 'Anonymous'}</p>
-  <div className="flex">
-    {Array(5)
-      .fill(0)
-      .map((_, idx) => (
-        <span key={idx} className={review.rating > idx ? 'text-yellow-500' : 'text-gray-300'}>
-          ★
-        </span>
-      ))}
-  </div>
-</div>
+  {/* Review Form (first) */}
+  <div className="max-w-3xl mx-auto mb-8 bg-white shadow-lg rounded-lg p-6">
+    <h3 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-2">
+      Leave a Review
+    </h3>
+    <p className="text-sm text-gray-600 mb-4">
+      Share your experience with this product. Your feedback helps others shop confidently.
+    </p>
 
-              </div>
-              <p className="mt-2">{review.comment}</p>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className="text-center text-lg">No reviews yet. Be the first to review!</div>
-      )}
-
-      {/* Review Form */}
-      {session?.user ? (
-        <div className="mt-8 p-6 border-t border-gray-200 rounded-lg bg-white shadow-md">
-          <h3 className="text-xl sm:text-2xl font-semibold text-gray-800">Leave a Review</h3>
-          <div className="mt-6">
-            <textarea
-              value={newReview}
-              onChange={(e) => setNewReview(e.target.value)}
-              className="w-full p-4 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-yellow-500"
-              placeholder="Write your review here..."
-              rows={4}
-            />
-          </div>
-          <div className="mt-4 flex items-center gap-4 flex-wrap">
-            <div className="flex">
+    {session?.user ? (
+      <>
+        <div className="flex flex-col gap-4">
+          <div>
+            <label className="block text-sm font-medium mb-1">Your Rating</label>
+            <div className="flex gap-1">
               {Array(5)
                 .fill(0)
                 .map((_, idx) => (
                   <span
                     key={idx}
                     onClick={() => setNewRating(idx + 1)}
-                    className={`text-xl cursor-pointer ${newRating > idx ? 'text-yellow-500' : 'text-gray-300'}`}
+                    className={`text-2xl cursor-pointer transition ${
+                      newRating > idx ? 'text-yellow-500' : 'text-gray-300'
+                    }`}
+                    aria-label={`${idx + 1} star`}
                   >
                     ★
                   </span>
                 ))}
             </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">Your Review</label>
+            <textarea
+              value={newReview}
+              onChange={(e) => setNewReview(e.target.value)}
+              className="w-full p-4 border border-gray-300 rounded-md shadow-sm resize-none focus:outline-none focus:ring-2 focus:ring-yellow-500"
+              placeholder="Write your review here..."
+              rows={4}
+            />
+          </div>
+
+          <div className="flex justify-end">
             <button
               onClick={handleReviewSubmit}
-              className="bg-black text-white py-2 px-6 rounded-md shadow-md hover:bg-gray-800 transition duration-200"
+              className="bg-black text-white py-2 px-6 rounded-md font-semibold shadow hover:brightness-110 transition"
             >
               Submit Review
             </button>
           </div>
         </div>
-      ) : (
-        <div className="mt-8 text-center text-lg text-gray-600">
-          <p>You must be logged in to submit a review</p>
-        </div>
-      )}
+      </>
+    ) : (
+      <div className="text-center text-lg text-gray-600">
+        <p>You must be logged in to submit a review</p>
+      </div>
+    )}
+  </div>
+
+  {/* Summary */}
+  <div className="max-w-3xl mx-auto flex flex-col sm:flex-row items-start sm:items-center gap-6 mb-6">
+    <div className="flex items-center gap-3">
+      <div className="flex">
+        {[...Array(5)].map((_, i) => (
+          <span
+            key={i}
+            className={`text-xl ${
+              averageRating && averageRating > i ? 'text-yellow-400' : 'text-gray-300'
+            }`}
+            aria-hidden="true"
+          >
+            ★
+          </span>
+        ))}
+      </div>
+      <div className="flex flex-col">
+        {roundedAvg !== null ? (
+          <>
+            <div className="text-lg font-semibold">
+              {roundedAvg} <span className="text-sm font-normal">/ 5</span>
+            </div>
+            <div className="text-sm text-gray-500">
+              {reviewCount} review{reviewCount > 1 ? 's' : ''}
+            </div>
+          </>
+        ) : (
+          <div className="text-sm text-gray-500">No reviews yet</div>
+        )}
+      </div>
     </div>
+    {roundedAvg !== null && (
+      <div className="ml-auto text-sm text-gray-600">
+        {/* Optional: breakdown placeholder */}
+        {/* Could add bars for 5★,4★ etc. here */}
+      </div>
+    )}
+  </div>
+
+  {/* Loading / error */}
+  {isLoadingReviews ? (
+    <div className="text-center text-lg sm:text-xl">Loading reviews...</div>
+  ) : errorFetchingReviews ? (
+    <div className="text-center text-xl text-red-600">{errorFetchingReviews}</div>
+  ) : reviews.length > 0 ? (
+    <div className="max-w-3xl mx-auto space-y-4">
+      {reviews.map((review) => (
+        <div
+          key={review.id}
+          className="border rounded-lg p-4 shadow-sm bg-white flex flex-col gap-3"
+        >
+          <div className="flex items-center gap-4">
+            <Image
+              src={review.user?.image || '/images/fallback-user.png'}
+              alt={review.user?.name || 'User Avatar'}
+              width={44}
+              height={44}
+              className="rounded-full object-cover"
+            />
+            <div className="flex-1">
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <p className="font-semibold">{review.user?.name || 'Anonymous'}</p>
+                <div className="flex items-center gap-1">
+                  {[...Array(5)].map((_, idx) => (
+                    <span
+                      key={idx}
+                      className={`text-sm ${
+                        review.rating > idx ? 'text-yellow-500' : 'text-gray-300'
+                      }`}
+                      aria-hidden="true"
+                    >
+                      ★
+                    </span>
+                  ))}
+                  <span className="text-xs text-gray-500 ml-2">{review.rating.toFixed(1)}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <p className="text-gray-700">{review.comment}</p>
+        </div>
+      ))}
+    </div>
+  ) : (
+    <div className="text-center text-lg">No reviews yet. Be the first to review!</div>
+  )}
+</div>
+
   </div>
 );
 }

@@ -12,7 +12,7 @@ const testimonials = [
     rating: 5,
   },
   {
-    name: 'Tanmay Biswas',
+    name: 'Sujal Debnath',
     text: 'Fast delivery and good quality products. Highly recommended for everyone.',
     image: '/images/user1.jpg',
     rating: 4,
@@ -45,13 +45,37 @@ const testimonials = [
 
 const Testimonials = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isMobile, setIsMobile] = useState<boolean>(false);
 
+  // update isMobile on resize
   useEffect(() => {
+    const check = () => setIsMobile(window.matchMedia('(max-width: 767px)').matches);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
+
+  // advance index
+  useEffect(() => {
+    const step = isMobile ? 1 : 2;
     const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 2) % testimonials.length);
+      setCurrentIndex((prev) => (prev + step) % testimonials.length);
     }, 4000);
     return () => clearInterval(interval);
-  }, []);
+  }, [isMobile]);
+
+  const visibleCount = isMobile ? 1 : 2;
+
+  // get slice with wrapping
+  const getVisible = () => {
+    const res = [];
+    for (let i = 0; i < visibleCount; i++) {
+      res.push(testimonials[(currentIndex + i) % testimonials.length]);
+    }
+    return res;
+  };
+
+  const visibleTestimonials = getVisible();
 
   return (
     <div className="text-center py-12 overflow-hidden">
@@ -61,14 +85,16 @@ const Testimonials = () => {
       <div className="relative flex justify-center">
         <AnimatePresence mode="wait">
           <motion.div
-            key={currentIndex}
+            key={`${currentIndex}-${visibleCount}`}
             initial={{ x: 100, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: -100, opacity: 0 }}
             transition={{ duration: 0.6 }}
-            className="flex flex-col md:flex-row items-center justify-center gap-8"
+            className={`flex gap-8 justify-center ${
+              isMobile ? 'flex-col items-center' : 'flex-row items-start'
+            }`}
           >
-            {testimonials.slice(currentIndex, currentIndex + 2).map((t, i) => (
+            {visibleTestimonials.map((t, i) => (
               <div
                 key={i}
                 className="bg-white rounded-xl shadow-md p-4 w-[320px] md:w-[400px] text-left"
@@ -82,11 +108,16 @@ const Testimonials = () => {
                     className="w-[70px] h-[70px] rounded-full object-cover"
                   />
 
-                  <div>
+                  <div className="flex-1">
                     <h4 className="font-bold text-gray-800">{t.name}</h4>
                     <p className="text-sm text-gray-600 mt-1">{t.text}</p>
-                    <div className="text-yellow-500 mt-2">
-                      {'★'.repeat(t.rating)}{'☆'.repeat(5 - t.rating)}
+                    <div className="text-yellow-500 mt-2 flex items-center gap-1">
+                      {[...Array(5)].map((_, idx) => (
+                        <span key={idx} className={t.rating > idx ? '' : 'opacity-40'}>
+                          ★
+                        </span>
+                      ))}
+                      <span className="text-xs text-gray-500 ml-2">{t.rating}.0</span>
                     </div>
                   </div>
                 </div>
