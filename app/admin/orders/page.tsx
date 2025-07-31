@@ -66,7 +66,7 @@ export default function AdminOrdersPage() {
   }, []);
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <div className="p-6 max-w-7xl mx-auto mt-20">
       <h1 className="text-4xl font-bold mb-8 text-center text-white">🛒 Admin - All Orders</h1>
       {loading ? (
         <p className="text-center text-lg text-black">Loading orders...</p>

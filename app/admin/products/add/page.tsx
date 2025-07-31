@@ -143,7 +143,7 @@ export default function AddProductPage() {
   };
 
   return (
-    <div className="p-6 bg-white text-black max-w-4xl mx-auto mb-10 mt-10 rounded-lg">
+    <div className="p-6 bg-white text-black max-w-4xl mx-auto mb-10 mt-10 rounded-lg mt-20">
       <h1 className="text-2xl font-bold mb-4">Add Product</h1>
       <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4">
         {/* Basic Fields */}

@@ -94,7 +94,7 @@ const hasChanges = (id: string) => {
   }, [users, editingUser]);
 
   return (
-    <div className="p-6 min-h-screen bg-gray-50">
+    <div className="p-6 min-h-screen bg-gray-50 mt-20">
       <div className="max-w-[1200px] mx-auto">
         <h2 className="text-3xl font-bold mb-6">Manage Users</h2>
 

@@ -193,7 +193,7 @@ export default function EditProductPage() {
     return <p className="text-red-500 text-center">{error || 'Product not found'}</p>;
 
   return (
-    <div className="p-6 max-w-4xl mx-auto text-black mb-10">
+    <div className="p-6 max-w-4xl mx-auto text-black mb-10 mt-20">
       <h1 className="text-3xl font-bold mb-6 text-center text-gray-100">Edit Product</h1>
 
       <div className="grid grid-cols-1 gap-6">

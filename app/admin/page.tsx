@@ -12,7 +12,7 @@ export default function AdminDashboard() {
   ];
 
   return (
-    <div className="p-6 max-w-3xl mx-auto">
+    <div className="p-6 max-w-3xl mx-auto mt-20">
       <h1 className="text-4xl font-bold mb-8 text-center text-gray-100">Admin Dashboard</h1>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">

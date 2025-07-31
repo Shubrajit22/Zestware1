@@ -122,7 +122,7 @@ export default function ProfilePage() {
   const userData = session.user as SessionUser;
 
   return (
-    <div className="min-h-screen bg-gray-50 py-6 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 py-6 px-4 sm:px-6 lg:px-8 mt-20">
       <div className="max-w-[90%] mx-auto flex flex-col lg:flex-row gap-8">
         {/* Left panel / top on mobile */}
         <div className="w-full lg:w-1/4 flex flex-col gap-6">

@@ -51,7 +51,7 @@ export default function AdminReviewPage() {
   if (loading) return <div className="p-6 text-center">Loading reviews...</div>;
 
   return (
-    <div className="p-8 max-w-4xl mx-auto">
+    <div className="p-8 max-w-4xl mx-auto mt-20">
       <h1 className="text-3xl font-bold mb-8 text-center text-gray-100">🛠️ Admin Review Panel</h1>
       {reviews.length === 0 ? (
         <p className="text-center text-gray-500">No reviews found.</p>

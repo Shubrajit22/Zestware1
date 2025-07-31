@@ -16,7 +16,7 @@ interface Product {
   category: string;
   mrpPrice?: number;
   description: string;
-  rating?: number | null; // ← add this
+  rating?: number | null; 
 }
 
 
@@ -203,13 +203,12 @@ return (
             <button key={index} onClick={() => handleImageChange(thumb)}>
               <div className="w-[70px] h-[70px] border rounded-md overflow-hidden">
                 <Image
-  src={getValidImage(thumb)}
-  alt={`Thumbnail ${index + 1}`}
-  width={80}
-  height={80}
-  className="object-cover w-full h-full"
-/>
-
+                  src={getValidImage(thumb)}
+                  alt={`Thumbnail ${index + 1}`}
+                  width={80}
+                  height={80}
+                  className="object-cover w-full h-full"
+                />
               </div>
             </button>
           ))}

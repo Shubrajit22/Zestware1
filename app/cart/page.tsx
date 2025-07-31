@@ -250,7 +250,7 @@ return (
               {/* Product Info */}
               <div className="flex-1 space-y-2 text-center md:text-left">
                 <h2 className="text-2xl font-bold">{item.product.name}</h2>
-                <p className="text-gray-300 text-sm">{item.product.description}</p>
+                <p className="text-gray-300 text-sm line-clamp-2">{item.product.description}</p>
                 <p className="text-lg">Size: <span className="font-semibold">{item.size}</span></p>
                 <p className="text-2xl font-semibold ">
                   ₹{item.product.price.toFixed(2)}
@@ -313,7 +313,7 @@ return (
               </div>
               <button
                 onClick={handleRazorpayPayment}
-                className="w-full py-4 text-xl font-bold rounded-lg bg-gradient-to-r from-blue-600 to-indigo-700 hover:scale-105 hover:from-blue-500 hover:to-indigo-600 transition duration-300 text-white shadow-xl"
+                className="hover:cursor-pointer w-full py-4 text-xl font-bold rounded-lg bg-gradient-to-r from-blue-600 to-indigo-700 hover:scale-105 hover:from-blue-500 hover:to-indigo-600 transition duration-300 text-white shadow-xl"
               >
                 Pay Now – ₹{calculateTotal().toFixed(2)}
               </button>
