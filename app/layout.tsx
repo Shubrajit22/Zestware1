@@ -24,8 +24,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className={`${poppins.variable} antialiased min-h-screen flex flex-col`}>
+    <html lang="en" className="overflow-x-hidden">
+      <body className={`${poppins.variable} antialiased min-h-screen flex flex-col overflow-x-hidden`}>
         <SessionWrapper>
           <CartContextProvider>
             <Navbar />
@@ -33,8 +33,6 @@ export default function RootLayout({
               {children}
               <Toaster position="top-center" reverseOrder={false} />
             </main>
-
-            {/* Footer will always be at the bottom */}
             <Footer />
           </CartContextProvider>
         </SessionWrapper>

@@ -1,15 +1,42 @@
-"use client";
+'use client';
 
-import React from "react";
-import { motion } from "framer-motion";
-import SearchBarWithResults from "./search";
-import Uniform3D from "./ImageGallery";
+import React, { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
+import SearchBarWithResults from './search';
+import dynamic from 'next/dynamic';
+
+// Dynamically import the 3D viewer to avoid SSR issues
+const Uniform3D = dynamic(() => import('./ImageGallery'), {
+  ssr: false,
+});
+
+const supportsWebGL = (): boolean => {
+  try {
+    const canvas = document.createElement('canvas');
+    return !!(
+      window.WebGLRenderingContext &&
+      (canvas.getContext('webgl') || canvas.getContext('experimental-webgl'))
+    );
+  } catch {
+    return false;
+  }
+};
 
 const HeroSection = () => {
+  const [hasMounted, setHasMounted] = useState(false);
+  const [webglOk, setWebglOk] = useState(true);
+
+  useEffect(() => {
+    setHasMounted(true);
+    setWebglOk(supportsWebGL());
+  }, []);
+
   return (
-    <section className="relative w-full text-white overflow-hidden py-10">
-      <div className="max-w-[90%] md:max-w-[80%] mx-auto grid grid-cols-1 md:grid-cols-2 items-center gap-12 md:gap-20 px-4 md:px-12 relative z-10">
-        
+    <section
+      className="relative w-full text-white overflow-hidden pt-[88px] py-10"
+      style={{ minHeight: 'calc(100vh - 88px)' }}
+    >
+      <div className="max-w-[90%] md:max-w-[80%] mx-auto grid grid-cols-1 md:grid-cols-2 items-start gap-12 md:gap-20 px-4 md:px-12 relative z-10">
         {/* LEFT SIDE */}
         <div className="space-y-6 text-center md:text-left">
           <motion.h1
@@ -29,9 +56,9 @@ const HeroSection = () => {
             transition={{ delay: 0.3, duration: 0.6 }}
             className="text-gray-300 text-base sm:text-lg md:text-xl max-w-lg mx-auto md:mx-0"
           >
-            Find the best, reliable, and high quality uniforms here.
-            We focus on product quality. Uniforms for almost all schools—
-            so why wait? Order now!
+            Find the best, reliable, and high quality uniforms here. We focus on
+            product quality. Uniforms for almost all schools—so why wait?&nbsp;Order
+            now!
           </motion.p>
 
           <motion.div
@@ -51,7 +78,9 @@ const HeroSection = () => {
             <button
               className="px-6 py-3 sm:px-8 sm:py-4 text-base sm:text-lg rounded-full bg-white text-black hover:bg-yellow-300 transition font-semibold shadow-lg"
               onClick={() => {
-                document.getElementById('product-categories')?.scrollIntoView({ behavior: 'smooth' });
+                document
+                  .getElementById('product-categories')
+                  ?.scrollIntoView({ behavior: 'smooth' });
               }}
             >
               Shop Now
@@ -59,15 +88,26 @@ const HeroSection = () => {
           </motion.div>
         </div>
 
-        {/* RIGHT SIDE */}
+        {/* RIGHT SIDE - GLB model only */}
         <motion.div
           initial={{ opacity: 0, x: 50 }}
-          animate={{ opacity: 1, x: 0 }}
+          animate={{ opacity: hasMounted ? 1 : 0, x: 0 }}
           transition={{ duration: 0.8 }}
           className="relative flex justify-center md:justify-end"
         >
           <div className="w-[260px] sm:w-[320px] md:w-[400px] lg:w-[480px]">
-            <Uniform3D />
+            {hasMounted && webglOk ? (
+              <Uniform3D />
+            ) : hasMounted && !webglOk ? (
+              <div className="rounded-lg bg-gray-900/80 p-6 flex items-center justify-center h-[400px]">
+                <p className="text-center text-sm sm:text-base text-gray-300">
+                  3D view not supported on this device. Please use a modern browser
+                  with WebGL enabled.
+                </p>
+              </div>
+            ) : (
+              <div className="rounded-lg bg-gray-800 animate-pulse h-[400px]" />
+            )}
           </div>
         </motion.div>
       </div>
