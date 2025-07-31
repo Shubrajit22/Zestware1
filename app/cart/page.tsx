@@ -216,101 +216,114 @@ const CartPage = () => {
     rzp.open();
   };
 
-  return (
-    <div className="bg-white-gradient min-h-screen container mx-auto p-6 flex flex-col">
-      <h1 className="text-4xl font-semibold text-center text-slate-900 mb-6">Your Cart</h1>
-      {loading ? (
-        <div className="text-center text-xl">Loading...</div>
-      ) : (
-        <div className="space-y-8">
-          {cartItems.length === 0 ? (
-            <p className="text-center text-lg text-gray-600">Your cart is empty.</p>
-          ) : (
-            cartItems.map((item) => (
-              <div key={item.id} className="flex justify-between items-center bg-white-gradient p-6 rounded-lg shadow-md space-x-6">
-                <div className="flex-shrink-0 w-1/12">
-                  <Image
-                    src={item.product.imageUrl}
-                    alt={item.product.name}
-                    width={100}
-                    height={100}
-                    className="w-full h-auto object-cover rounded-lg border-2 border-gray-300"
-                  />
-                </div>
+return (
+  <div className="relative min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 text-white px-4 md:px-10 py-10">
+    <h1 className="text-5xl font-extrabold text-center mb-10  ">
+      Your Shopping Cart
+    </h1>
 
-                <div className="flex-1 space-y-4">
-                  <h2 className="text-2xl font-semibold text-gray-800">{item.product.name}</h2>
-                  <p className="text-sm text-gray-500">{item.product.description}</p>
-                  <p className="text-lg text-gray-700">Size: {item.size}</p>
-                  <p className="text-lg font-semibold text-gray-900">
-                    Price: ₹{item.product.price.toFixed(2)}
-                  </p>
-                </div>
+    {loading ? (
+      <div className="text-center text-2xl animate-pulse">Loading...</div>
+    ) : (
+      <div className="space-y-10 max-w-7xl mx-auto">
+        {cartItems.length === 0 ? (
+          <p className="text-center text-lg text-gray-400">
+            Your cart is empty. Add some products to see the magic!
+          </p>
+        ) : (
+          cartItems.map((item) => (
+            <div
+              key={item.id}
+              className="flex flex-col md:flex-row items-center justify-between bg-white/10 rounded-2xl shadow-xl p-6 gap-8 hover:shadow-2xl transition duration-300"
+            >
+              {/* Product Image */}
+              <div className="flex-shrink-0 w-40 h-40">
+                <Image
+                  src={item.product.imageUrl}
+                  alt={item.product.name}
+                  width={160}
+                  height={160}
+                  className="w-full h-full object-cover rounded-xl border-2 border-gray-300"
+                />
+              </div>
 
-                <div className="flex flex-col items-end space-y-4 w-1/4">
-                  <div className="flex items-center space-x-6">
-                    <button
-                      onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)}
-                      disabled={item.quantity <= 1}
-                      className="px-6 py-2 bg-black text-white rounded-lg disabled:opacity-50 transition cursor-pointer"
-                    >
-                      -
-                    </button>
-                    <span className="text-xl text-black font-medium">{item.quantity}</span>
-                    <button
-                      onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
-                      className="px-6 py-2 bg-black text-white rounded-lg transition cursor-pointer"
-                    >
-                      +
-                    </button>
-                  </div>
+              {/* Product Info */}
+              <div className="flex-1 space-y-2 text-center md:text-left">
+                <h2 className="text-2xl font-bold">{item.product.name}</h2>
+                <p className="text-gray-300 text-sm">{item.product.description}</p>
+                <p className="text-lg">Size: <span className="font-semibold">{item.size}</span></p>
+                <p className="text-2xl font-semibold ">
+                  ₹{item.product.price.toFixed(2)}
+                </p>
+              </div>
+
+              {/* Quantity & Remove */}
+              <div className="flex flex-col items-center md:items-end space-y-6">
+                <div className="flex items-center gap-4">
                   <button
-                    onClick={() => handleRemoveItem(item.id)}
-                    className="text-slate-100 font-medium transition cursor-pointer"
+                    onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)}
+                    disabled={item.quantity <= 1}
+                    className="w-10 h-10 bg-gray-700 text-white rounded-full hover:bg-yellow-500 disabled:opacity-50"
                   >
-                    <Image src="/images/remove.png" alt="remove" width={30} height={30} />
+                    -
+                  </button>
+                  <span className="text-xl font-medium">{item.quantity}</span>
+                  <button
+                    onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
+                    className="w-10 h-10 bg-gray-700 text-white rounded-full hover:bg-yellow-500"
+                  >
+                    +
                   </button>
                 </div>
-              </div>
-            ))
-          )}
-
-          {cartItems.length > 0 && (
-            <div className="mt-6 flex justify-between items-center text-2xl font-bold text-slate-900">
-              <h3 className="ml-auto">Total:</h3>
-              <div className="text-right text-xl font-semibold text-slate-900 pl-4">
-                ₹{calculateTotal().toFixed(2)}
+                <button
+                  onClick={() => handleRemoveItem(item.id)}
+                  className="flex items-center gap-2 text-red-400 hover:text-red-300 transition"
+                >
+                  <Image src="/images/remove.png" alt="remove" width={25} height={25} />
+                  <span className="text-sm">Remove</span>
+                </button>
               </div>
             </div>
-          )}
+          ))
+        )}
 
-          {cartItems.length > 0 && (
-            <div className="mt-10">
-              <h2 className="text-2xl font-semibold text-slate-900 mb-4">Proceed to Payment</h2>
-              <div className="mb-6">
-                <label className="block text-gray-700 text-lg font-medium mb-2">
-                  Shipping Address
-                </label>
+        {cartItems.length > 0 && (
+          <>
+            {/* Total */}
+            <div className="flex justify-end items-center text-2xl font-bold">
+              <h3 className="pr-4">Total:</h3>
+              <span className=" text-white rounded-xl px-4 py-2">
+                ₹{calculateTotal().toFixed(2)}
+              </span>
+            </div>
+
+            {/* Payment Section */}
+            <div className="bg-white/5 rounded-xl shadow-lg p-6 space-y-6">
+              <h2 className="text-2xl font-semibold">Proceed to Payment</h2>
+              <div>
+                <label className="block text-lg mb-2">Please Enter Your Shipping Address Before Payment</label>
                 <textarea
-                  className="w-full p-3 border rounded text-gray-800"
+                  className="w-full p-4 rounded-lg text-white border border-white bg-transparent focus:outline-none focus:border-gray-300"
                   rows={3}
-                  placeholder="Enter your shipping address here"
+                  placeholder="Enter your shipping address..."
                   value={selectedAddress}
                   onChange={(e) => setSelectedAddress(e.target.value)}
                 />
+
               </div>
               <button
                 onClick={handleRazorpayPayment}
-                className="py-3 bg-black text-white rounded-lg transition-all cursor-pointer w-1/3"
+                className="w-full py-4 text-xl font-bold rounded-lg bg-gradient-to-r from-blue-600 to-indigo-700 hover:scale-105 hover:from-blue-500 hover:to-indigo-600 transition duration-300 text-white shadow-xl"
               >
-                Pay with Razorpay – ₹{calculateTotal().toFixed(2)}
+                Pay Now – ₹{calculateTotal().toFixed(2)}
               </button>
             </div>
-          )}
-        </div>
-      )}
-    </div>
-  );
-};
+          </>
+        )}
+      </div>
+    )}
+  </div>
+);
+}
 
 export default CartPage;

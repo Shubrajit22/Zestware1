@@ -1,31 +1,53 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, ProductCategoryEnum } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
 async function main() {
-  const sizes = [
-    { size: 'XS', price: 449 },
-    { size: 'S', price: 459 },
-    { size: 'M', price: 469 },
-    { size: 'L', price: 479 },
-    { size: 'XL', price: 489 },
-    { size: 'XXL', price: 499 },
+  const categories = [
+    {
+      name: ProductCategoryEnum.BRAHMAND,
+      imageUrl: '/images/brahmand.jpeg',
+      description: 'A special category for Brahmand products like T-shirts and Hoodies.',
+    },
+    {
+      name: ProductCategoryEnum.NIRVAY,
+      imageUrl: '/images/nirbhay.jpeg',
+      description: 'Nirvay series, crafted for bold and fearless individuals.',
+    },
+    {
+      name: ProductCategoryEnum.UNIFORM,
+      imageUrl: '/images/uniform.jpeg',
+      description: 'Uniforms for various institutions and organizations.',
+    },
+    {
+      name: ProductCategoryEnum.JERSEY,
+      imageUrl: '/images/jersey.jpg',
+      description: 'Jersey collection for all sports lovers.',
+    },
+    {
+      name: ProductCategoryEnum.SHOES,
+      imageUrl: '/images/shoes.jpeg',
+      description: 'Category for shoes, ranging from casual to formal.',
+    },
   ];
 
-  for (const size of sizes) {
-    await prisma.customiseSize.upsert({
-      where: { size: size.size },
-      update: {},
-      create: size,
+  for (const cat of categories) {
+    await prisma.productCategory.upsert({
+      where: { name: cat.name },
+      update: {
+        imageUrl: cat.imageUrl,
+        description: cat.description,
+      },
+      create: cat,
     });
   }
 
-  console.log('✅ Customise sizes seeded successfully.');
+  console.log('✅ Categories seeded: BRAHMAND → NIRVAY → UNIFORM → JERSEY → SHOES');
 }
 
 main()
   .catch((e) => {
-    console.error('❌ Seeding failed:', e);
+    console.error(e);
     process.exit(1);
   })
   .finally(async () => {

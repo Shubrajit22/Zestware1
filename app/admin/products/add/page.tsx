@@ -37,6 +37,11 @@ export default function AddProductPage() {
 
   const [sizeOptions, setSizeOptions] = useState<SizeOption[]>([]);
   const [stockImages, setStockImages] = useState<string[]>([]);
+  const [loadingUpload, setLoadingUpload] = useState(false);
+
+  // Cloudinary config
+  const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!;
+  const UPLOAD_PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_PRESET!;
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -69,12 +74,40 @@ export default function AddProductPage() {
   const removeSizeOption = (i: number) =>
     setSizeOptions(sizeOptions.filter((_, index) => index !== i));
 
-  const addStockImage = () => setStockImages([...stockImages, '']);
-  const updateStockImage = (index: number, value: string) => {
-    const updated = [...stockImages];
-    updated[index] = value;
-    setStockImages(updated);
+  // Cloudinary upload
+  const handleCloudinaryUpload = async (file: File, index?: number) => {
+    if (!file) return;
+    setLoadingUpload(true);
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', UPLOAD_PRESET);
+
+    try {
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await res.json();
+      const url = data.secure_url;
+
+      if (index !== undefined) {
+        const updated = [...stockImages];
+        updated[index] = url;
+        setStockImages(updated);
+      } else {
+        setForm((prev) => ({ ...prev, imageUrl: url }));
+      }
+
+      toast.success('Image uploaded!');
+    } catch (err) {
+      toast.error('Failed to upload image');
+      console.log(err);
+    } finally {
+      setLoadingUpload(false);
+    }
   };
+
+  const addStockImage = () => setStockImages([...stockImages, '']);
   const removeStockImage = (i: number) =>
     setStockImages(stockImages.filter((_, index) => index !== i));
 
@@ -101,43 +134,45 @@ export default function AddProductPage() {
 
       if (!res.ok) throw new Error('Failed to add product');
 
-      toast.success(' Product added successfully!');
+      toast.success('Product added successfully!');
       router.push('/admin/products');
     } catch (err) {
-      toast.error(' Could not submit product');
+      toast.error('Could not submit product');
       console.error(err);
     }
   };
 
   return (
-    <div className="p-6 bg-white text-black max-w-4xl mx-auto">
+    <div className="p-6 bg-white text-black max-w-4xl mx-auto mb-10 mt-10 rounded-lg">
       <h1 className="text-2xl font-bold mb-4">Add Product</h1>
       <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4">
         {/* Basic Fields */}
-        {[
-          'name',
-          'description',
-          'price',
-          'mrpPrice',
-          'discount',
-          'imageUrl',
-          'state',
-          'district',
-          'institution',
-          'color',
-          'texture',
-          'neckline',
-        ].map((field) => (
+        {['name', 'description', 'price', 'mrpPrice', 'discount', 'state', 'district', 'institution', 'color', 'texture', 'neckline'].map(
+          (field) => (
+            <input
+              key={field}
+              name={field}
+              value={form[field]}
+              onChange={handleChange}
+              placeholder={field}
+              required={['name', 'price', 'mrpPrice', 'discount'].includes(field)}
+              className="p-2 border rounded"
+            />
+          )
+        )}
+
+        {/* Main Image Upload */}
+        <div className="flex flex-col gap-2">
+          <p className="font-semibold">Main Image:</p>
+          {form.imageUrl && (
+            <Image src={form.imageUrl} alt="preview" width={100} height={100} className="rounded" />
+          )}
           <input
-            key={field}
-            name={field}
-            value={form[field]}
-            onChange={handleChange}
-            placeholder={field}
-            required={['name', 'price', 'mrpPrice', 'discount'].includes(field)}
-            className="p-2 border rounded"
+            type="file"
+            accept="image/*"
+            onChange={(e) => e.target.files && handleCloudinaryUpload(e.target.files[0])}
           />
-        ))}
+        </div>
 
         {/* Category */}
         <select
@@ -171,26 +206,19 @@ export default function AddProductPage() {
           ))}
         </select>
 
-        {/* Stock Images */}
+        {/* Stock Images Upload */}
         <div>
           <p className="font-semibold">Stock Images:</p>
           {stockImages.map((img, index) => (
             <div key={index} className="flex gap-2 my-1 items-center">
-              <input
-                value={img}
-                onChange={(e) => updateStockImage(index, e.target.value)}
-                placeholder="Image URL"
-                className="p-2 border rounded flex-1"
-              />
               {img && img.startsWith('http') && (
-                <Image
-  src={img}
-  alt="preview"
-  width={48}
-  height={48}
-  className="rounded object-cover"
-/>
+                <Image src={img} alt="preview" width={48} height={48} className="rounded" />
               )}
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => e.target.files && handleCloudinaryUpload(e.target.files[0], index)}
+              />
               <button
                 type="button"
                 onClick={() => removeStockImage(index)}
@@ -246,9 +274,10 @@ export default function AddProductPage() {
 
         <button
           type="submit"
+          disabled={loadingUpload}
           className="mt-4 p-2 bg-green-600 text-white rounded hover:bg-green-700"
         >
-          Submit Product
+          {loadingUpload ? 'Uploading...' : 'Submit Product'}
         </button>
       </form>
     </div>

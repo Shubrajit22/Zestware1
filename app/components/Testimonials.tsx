@@ -1,72 +1,99 @@
-// components/Testimonials.tsx
 'use client';
 
 import Image from 'next/image';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const testimonials = [
   {
-    name: 'Hamza Faizi',
-    text: 'Don’t waste time, just order! This is the best website to purchase school uniforms.',
-    image: '/hamza.jpg', // Replace with actual image paths
+    name: 'Himadri Das',
+    text: 'This is the best place to get premium quality school uniforms.',
+    image: '/images/user4.jpg',
+    rating: 5,
+  },
+  {
+    name: 'Tanmay Biswas',
+    text: 'Fast delivery and good quality products. Highly recommended for everyone.',
+    image: '/images/user1.jpg',
     rating: 4,
   },
   {
-    name: 'Hafiz Huzaifa',
-    text: 'I’ve been purchasing uniforms of Zestwear India for a long time. All the products are good quality.',
-    image: '/hafiz.jpg',
+    name: 'Rupomi Dutta',
+    text: 'The uniforms fit perfectly and the fabric quality is excellent. Thank you Zestwear!',
+    image: '/images/user5.jpg',
     rating: 5,
   },
-  // Add more testimonials if needed
+  {
+    name: 'Pritam Baruah',
+    text: 'Amazing designs and affordable prices. Will definitely order again.',
+    image: '/images/user3.png',
+    rating: 4,
+  },
+  {
+    name: 'Soumya Chakraborty',
+    text: 'Great customer service and reliable delivery. Loved the experience!',
+    image: '/images/user2.png',
+    rating: 5,
+  },
+  {
+    name: 'Aditi Sharma',
+    text: 'Uniforms are durable and look very neat. Perfect for our school.',
+    image: '/images/user6.jpg',
+    rating: 5,
+  },
 ];
 
 const Testimonials = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  return (
-    <div className="text-center py-12">
-      <p className="text-slate-100 font-bold text-4xl ">
-        Here are some of the best clients.
-      </p>
-      <h2 className="text-2xl font-bold mt-2 mb-8">What People Say About Us</h2>
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 2) % testimonials.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
 
-      <div className="flex flex-col items-center md:flex-row justify-center gap-8 transition-all">
-        {testimonials.slice(currentIndex, currentIndex + 2).map((t, i) => (
-          <div
-            key={i}
-            className="bg-white rounded-xl shadow-md p-4 w-[320px] md:w-[400px] text-left"
+  return (
+    <div className="text-center py-12 overflow-hidden">
+      <p className="text-slate-100 font-bold text-4xl mb-10">
+        Here are some of our happiest clients
+      </p>
+      <div className="relative flex justify-center">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentIndex}
+            initial={{ x: 100, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: -100, opacity: 0 }}
+            transition={{ duration: 0.6 }}
+            className="flex flex-col md:flex-row items-center justify-center gap-8"
           >
-            <div className="flex gap-4 items-center">
-              <Image
-                src={t.image}
-                alt={t.name}
-                width={80}
-                height={80}
-                className="rounded-lg object-cover text-gray-600"
-              />
-              <div>
-                <h4 className="font-bold text-gray-600">{t.name}</h4>
-                <p className="text-sm text-gray-600 mt-1">{t.text}</p>
-                <div className="text-yellow-500 mt-2">
-                  {'★'.repeat(t.rating)}{'☆'.repeat(5 - t.rating)}
+            {testimonials.slice(currentIndex, currentIndex + 2).map((t, i) => (
+              <div
+                key={i}
+                className="bg-white rounded-xl shadow-md p-4 w-[320px] md:w-[400px] text-left"
+              >
+                <div className="flex gap-4 items-center">
+                  <Image
+                    src={t.image}
+                    alt={t.name}
+                    width={70}
+                    height={70}
+                    className="w-[70px] h-[70px] rounded-full object-cover"
+                  />
+
+                  <div>
+                    <h4 className="font-bold text-gray-800">{t.name}</h4>
+                    <p className="text-sm text-gray-600 mt-1">{t.text}</p>
+                    <div className="text-yellow-500 mt-2">
+                      {'★'.repeat(t.rating)}{'☆'.repeat(5 - t.rating)}
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Pagination dots */}
-      <div className="flex justify-center mt-6 gap-3">
-        {testimonials.map((_, idx) => (
-          <span
-            key={idx}
-            onClick={() => setCurrentIndex(idx)}
-            className={`w-3 h-3 rounded-full cursor-pointer ${
-              currentIndex === idx ? 'bg-blue-600' : 'bg-gray-300'
-            }`}
-          />
-        ))}
+            ))}
+          </motion.div>
+        </AnimatePresence>
       </div>
     </div>
   );

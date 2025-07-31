@@ -7,12 +7,12 @@ const nextConfig: NextConfig = {
       'ibb.co',
       'i.ibb.co',
       'drive.google.com',
-      'res.cloudinary.com' // ✅ Add this line to support Google Drive images
+      'res.cloudinary.com' 
     ],
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "**.googleusercontent.com", // Gmail avatars
+        hostname: "**.googleusercontent.com", 
       },
     ],
   },

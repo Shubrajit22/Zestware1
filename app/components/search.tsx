@@ -80,7 +80,7 @@ const SearchBarWithResults = () => {
               />
               <div>
                 <p className="text-sm font-semibold text-gray-800">{product.name}</p>
-                <p className="text-xs text-gray-500">{product.description}</p>
+                <p className="text-xs text-gray-500 line-clamp-2">{product.description}</p>
               </div>
             </div>
           ))}

@@ -8,13 +8,13 @@ import Footer from "./components/Footer";
 import { Toaster } from 'react-hot-toast';
 
 const poppins = Poppins({
-  variable: "--font-poppins", // Custom variable for Poppins font
+  variable: "--font-poppins",
   subsets: ["latin"],
-  weight: ["400", "500", "700"], // Specify font weights
+  weight: ["400", "500", "700"],
 });
 
 export const metadata = {
-  title: "Zestware",
+  title: "Zestwear",
   description: "Assam's Uniform Startup",
 };
 
@@ -23,21 +23,19 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const backgroundClass = "bg-white-gradient";
-
   return (
     <html lang="en">
-      <body className={`${poppins.variable} antialiased ${backgroundClass}`}>
+      <body className={`${poppins.variable} antialiased min-h-screen flex flex-col`}>
         <SessionWrapper>
           <CartContextProvider>
-            <div className="min-h-screen flex flex-col">
-              <Navbar />
-              <main className="flex-grow">
-                {children}
-                <Toaster position="top-center" reverseOrder={false} />
-              </main>
-              <Footer />
-            </div>
+            <Navbar />
+            <main className="flex-grow">
+              {children}
+              <Toaster position="top-center" reverseOrder={false} />
+            </main>
+
+            {/* Footer will always be at the bottom */}
+            <Footer />
           </CartContextProvider>
         </SessionWrapper>
       </body>

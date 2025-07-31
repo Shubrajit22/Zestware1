@@ -1,19 +1,19 @@
 import HeroSection from "./components/HeroSection";
-import ImageGallery from "./components/ImageGallery";
 import MostSelling from "./components/MostSelling";
 import { CategoryGrid } from './components/CategoryGrid';
 import Testimonials from "./components/Testimonials";
 import CustomizeCard from "./components/Customise";
+import ScrollAnimationWrapper from "./components/ScrollAnimationWrapper";
 import { prisma } from '@/lib/prisma';
-import { Product } from '@prisma/client'; // ✅ Import Prisma type
+import { Product } from '@prisma/client';
 
 export default async function Home() {
-  let mostSellingProducts: Product[] = []; // ✅ Explicitly type it
+  let mostSellingProducts: Product[] = [];
 
   try {
     mostSellingProducts = await prisma.product.findMany({
       orderBy: {
-        salesCount: 'desc', // Assuming `salesCount` exists
+        salesCount: 'desc',
       },
       take: 6,
     });
@@ -23,31 +23,47 @@ export default async function Home() {
 
   return (
     <>
-      <main className="text-white">
-        <div className="px-6 md:px-20 py-2 min-h-screen">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-12 mt-24">
+      <main className="text-white relative">
+        {/* Background gradients */}
+        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-gradient-to-br from-pink-500/20 via-purple-500/20 to-transparent rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-gradient-to-tr from-blue-500/20 via-cyan-500/20 to-transparent rounded-full blur-3xl"></div>
+
+        {/* Hero */}
+        <div className="w-full h-screen flex items-center relative z-10">
+          <div className="w-full flex flex-col md:flex-row justify-between items-center gap-12">
             <HeroSection />
-            <ImageGallery />
           </div>
         </div>
       </main>
 
-      <section className="w-full bg-white text-black py-12 px-4 md:px-20">
-        <h1 className="text-center text-4xl font-bold mb-8">Product Categories</h1>
-        <CategoryGrid />
-      </section>
+      {/* Categories */}
+      <ScrollAnimationWrapper>
+        <section id="product-categories" className="w-full bg-white text-black py-12 px-4 md:px-20">
+          <h1 className="text-center text-4xl font-bold mb-8">Product Categories</h1>
+          <CategoryGrid />
+        </section>
+      </ScrollAnimationWrapper>
 
-      <section>
-        <CustomizeCard />
-      </section>
+      {/* Customize */}
+      <ScrollAnimationWrapper delay={0.2}>
+        <section>
+          <CustomizeCard />
+        </section>
+      </ScrollAnimationWrapper>
 
-      <section>
-        <MostSelling products={mostSellingProducts} />
-      </section>
+      {/* Most Selling */}
+      <ScrollAnimationWrapper delay={0.4}>
+        <section>
+          <MostSelling products={mostSellingProducts} />
+        </section>
+      </ScrollAnimationWrapper>
 
-      <section>
-        <Testimonials />
-      </section>
+      {/* Testimonials */}
+      <ScrollAnimationWrapper delay={0.6}>
+        <section>
+          <Testimonials />
+        </section>
+      </ScrollAnimationWrapper>
     </>
   );
 }

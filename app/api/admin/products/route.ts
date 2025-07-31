@@ -18,7 +18,7 @@ interface ProductRequestBody {
   description: string;
   price: number;
   mrpPrice: number;
-  discount: number;
+  discount?: number;
   imageUrl: string;
   categoryId: string;
   type: string;
@@ -111,12 +111,12 @@ export async function POST(req: NextRequest) {
             })),
         },
         stockImages: {
-          create: stockImages
-            .filter((img) => img.imageUrl?.trim())
-            .map((img) => ({
-              imageUrl: img.imageUrl,
-            })),
+          create: stockImages.map((img: string | StockImageInput) => ({
+            imageUrl: typeof img === "string" ? img : img.imageUrl,
+          })),
         },
+
+
       },
       include: {
         sizeOptions: true,
@@ -246,8 +246,7 @@ export async function PUT(req: Request) {
     return new Response(JSON.stringify({ error: 'Internal Server Error' }), { status: 500 });
   }
 }
-
-// ✅ DELETE: Delete product and associated data
+//DELETE
 export async function DELETE(req: Request) {
   try {
     const body: { id: string } = await req.json();
@@ -262,6 +261,8 @@ export async function DELETE(req: Request) {
       include: {
         sizeOptions: true,
         stockImages: true,
+        orderItems: true,
+        reviews: true,
       },
     });
 
@@ -269,13 +270,32 @@ export async function DELETE(req: Request) {
       return new Response(JSON.stringify({ error: 'Product not found' }), { status: 404 });
     }
 
+    // Delete related records first
+    await prisma.orderItem.deleteMany({ where: { productId: id } });
+    await prisma.review.deleteMany({ where: { productId: id } }); // delete reviews
     await prisma.sizeOption.deleteMany({ where: { productId: id } });
     await prisma.stockImage.deleteMany({ where: { productId: id } });
+
+    // Finally delete the product
     await prisma.product.delete({ where: { id } });
 
     return new Response(null, { status: 204 });
-  } catch (error) {
-    console.error('Error deleting product:', error);
-    return new Response(JSON.stringify({ error: 'Internal Server Error' }), { status: 500 });
+  } catch (error: unknown) {
+  console.error('Error deleting product:', error);
+
+  if (
+    typeof error === 'object' &&
+    error !== null &&
+    'code' in error &&
+    (error as { code?: string }).code === 'P2003'
+  ) {
+    return new Response(
+      JSON.stringify({
+        error: 'Cannot delete product because it is linked to other records',
+      }),
+      { status: 400 }
+    );
   }
-}
+
+  return new Response(JSON.stringify({ error: 'Internal Server Error' }), { status: 500 });
+}}

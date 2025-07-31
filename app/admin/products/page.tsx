@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import toast from 'react-hot-toast';
 
 type Product = {
   id: string;
@@ -52,6 +53,7 @@ const Products = () => {
         const message = err instanceof Error ? err.message : 'An unknown error occurred';
         console.error('Error fetching data:', message);
         setError(message);
+        toast.error(message);
       } finally {
         setLoading(false);
       }
@@ -73,9 +75,11 @@ const Products = () => {
       if (!res.ok) throw new Error('Delete failed');
 
       setProducts(prev => prev.filter(product => product.id !== id));
+      toast.success('Product deleted successfully');
     } catch (err) {
       console.error('Delete error:', err);
       setError('Failed to delete product');
+      toast.error('Failed to delete product');
     }
   };
 
@@ -106,7 +110,9 @@ const Products = () => {
       </div>
 
       <div className="mb-4">
-        <label htmlFor="category" className="mr-2 font-medium">Filter by Category:</label>
+        <label htmlFor="category" className="mr-2 font-medium">
+          Filter by Category:
+        </label>
         <select
           id="category"
           value={selectedCategory || ''}

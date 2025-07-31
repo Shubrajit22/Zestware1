@@ -173,9 +173,9 @@ export default function Navbar() {
       {/* Mobile Menu */}
       {isMenuOpen && (
         <div className="absolute top-16 left-1/2 transform -translate-x-1/2 bg-black text-white p-4 rounded-lg shadow-lg border border-gray-600 w-[90vw] max-w-sm z-50 md:hidden">
-          <Link href="#home" className="block py-2 hover:text-yellow-400">Home</Link>
-          <Link href="#contact" className="block py-2 hover:text-yellow-400">Contact</Link>
-          <Link href="#about" className="block py-2 hover:text-yellow-400">About</Link>
+          <Link href="/" className="block py-2 hover:text-yellow-400">Home</Link>
+          <Link href="/contact" className="block py-2 hover:text-yellow-400">Contact</Link>
+          <Link href="/about" className="block py-2 hover:text-yellow-400">About</Link>
 
           <div className="mt-4">
             <div className="flex items-center bg-white rounded-full px-2 py-1 shadow-inner">

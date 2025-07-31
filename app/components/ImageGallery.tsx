@@ -1,35 +1,27 @@
-// components/ImageGallery.tsx
-import Image from "next/image";
-import React from "react";
+"use client";
 
-const ImageGallery = () => {
+import React, { Suspense } from "react";
+import { Canvas } from "@react-three/fiber";
+import { OrbitControls, Stage } from "@react-three/drei";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+import { useLoader } from "@react-three/fiber";
+
+function UniformModel() {
+  const gltf = useLoader(GLTFLoader, "/models/uniform.glb"); // Your uniform 3D model
+  return <primitive object={gltf.scene} scale={1.5} />;
+}
+
+export default function Uniform3D() {
   return (
-    <div className="grid grid-cols-2 gap-4 items-center">
-      <div className="col-span-2">
-        <Image
-          src="/home/i1.png"
-          alt="Main Uniform"
-          width={500}
-          height={300}
-          className="rounded-xl object-cover w-full"
-        />
-      </div>
-      <Image
-        src="/home/i2.png"
-        alt="Uniform Kids"
-        width={240}
-        height={160}
-        className="rounded-xl object-cover"
-      />
-      <Image
-        src="/home/i3.png"
-        alt="Staff Uniform"
-        width={240}
-        height={160}
-        className="rounded-xl object-cover"
-      />
+    <div className="w-full h-[400px] md:h-[500px]">
+      <Canvas camera={{ position: [0, 1.5, 3] }}>
+        <Suspense fallback={null}>
+          <Stage environment="city" intensity={0.6}>
+            <UniformModel />
+          </Stage>
+          <OrbitControls enableZoom={false} />
+        </Suspense>
+      </Canvas>
     </div>
   );
-};
-
-export default ImageGallery;
+}
