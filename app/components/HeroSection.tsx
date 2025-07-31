@@ -78,7 +78,7 @@ const HeroSection = () => {
             transition={{ delay: 0.7, duration: 0.5 }}
           >
             <button
-              className="px-6 py-3 sm:px-8 sm:py-4 text-base sm:text-lg rounded-full bg-white text-black hover:bg-yellow-300 transition font-semibold shadow-lg"
+              className="px-6 py-3 sm:px-8 sm:py-4 text-base sm:text-lg rounded-full bg-white text-black hover:bg-yellow-300 transition font-semibold shadow-lg hover:cursor-pointer"
               onClick={() => {
                 document
                   .getElementById('product-categories')
