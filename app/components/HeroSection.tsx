@@ -66,18 +66,19 @@ const HeroSection = () => {
   animate={{ opacity: 1, x: 0 }}
   transition={{ duration: 0.8 }}
   whileHover={{ scale: 1.05 }}
-  className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg ml-auto pr-4 md:pr-8"
+  className="w-full max-w-[160px] sm:max-w-[240px] md:max-w-md lg:max-w-lg mx-auto md:ml-auto pr-2 sm:pr-4 md:pr-8"
 >
+  <Image
+    src="/images/customise.png"
+    alt="Customize illustration"
+    width={500}
+    height={600}
+    className="w-full h-auto object-contain drop-shadow-xl rounded-xl"
+    priority
+  />
+</motion.div>
 
-          <Image
-            src="/images/customise.png"
-            alt="Customize illustration"
-            width={500}
-            height={600}
-            className="w-full h-auto object-contain drop-shadow-xl rounded-xl"
-            priority
-          />
-        </motion.div>
+
       </div>
     </section>
   );

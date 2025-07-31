@@ -217,8 +217,8 @@ const CartPage = () => {
   };
 
 return (
-  <div className="relative min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 text-white px-4 md:px-10 py-10">
-    <h1 className="text-5xl font-extrabold text-center mb-10  ">
+  <div className="relative min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 text-white px-4 md:px-10 py-10 mt-10">
+    <h1 className="text-5xl font-extrabold text-center mb-10  mt-10">
       Your Shopping Cart
     </h1>
 
@@ -228,7 +228,7 @@ return (
       <div className="space-y-10 max-w-7xl mx-auto">
         {cartItems.length === 0 ? (
           <p className="text-center text-lg text-gray-400">
-            Your cart is empty. Add some products to see the magic!
+            Your cart is empty.
           </p>
         ) : (
           cartItems.map((item) => (
