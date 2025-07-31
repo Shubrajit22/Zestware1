@@ -64,7 +64,7 @@ export default function Navbar() {
   };
 
   return (
-    <nav className=" text-white py-4 px-6 md:px-12 flex items-center justify-between relative">
+    <nav className="z-50 fixed top-0 text-white py-4 px-6 md:px-12 flex items-center justify-between relative">
       {/* Left: Logo */}
       <Link href={'/'}>
       <div className="flex items-center space-x-4">

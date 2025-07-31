@@ -11,16 +11,18 @@ const Uniform3D = dynamic(() => import('./ImageGallery'), {
 });
 
 const supportsWebGL = (): boolean => {
+  if (typeof window === 'undefined') return false;
   try {
     const canvas = document.createElement('canvas');
     return !!(
-      window.WebGLRenderingContext &&
+      typeof WebGLRenderingContext !== 'undefined' &&
       (canvas.getContext('webgl') || canvas.getContext('experimental-webgl'))
     );
   } catch {
     return false;
   }
 };
+
 
 const HeroSection = () => {
   const [hasMounted, setHasMounted] = useState(false);
@@ -36,7 +38,7 @@ const HeroSection = () => {
       className="relative w-full text-white overflow-hidden pt-[88px] py-10"
       style={{ minHeight: 'calc(100vh - 88px)' }}
     >
-      <div className="max-w-[90%] md:max-w-[80%] mx-auto grid grid-cols-1 md:grid-cols-2 items-start gap-12 md:gap-20 px-4 md:px-12 relative z-10">
+      <div className="max-w-[90%] md:max-w-[80%] mx-auto grid grid-cols-1 md:grid-cols-2 items-start gap-12 md:gap-20 px-4 md:px-12 relative z-0">
         {/* LEFT SIDE */}
         <div className="space-y-6 text-center md:text-left">
           <motion.h1

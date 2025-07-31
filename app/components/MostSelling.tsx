@@ -35,7 +35,7 @@ export default function MostSelling({ products }: MostSellingProps) {
             >
               <div className="rounded-lg shadow-md hover:shadow-lg flex flex-col items-center cursor-pointer p-4 transition">
                 {/* Image */}
-                <div className="w-48 h-48 rounded-lg overflow-hidden mb-4">
+                <div className="w-36 h-36 sm:w-48 sm:h-48 rounded-lg overflow-hidden mb-4">
                   <Image
                     src={product.imageUrl}
                     alt={product.name}
@@ -45,6 +45,8 @@ export default function MostSelling({ products }: MostSellingProps) {
                     priority={false}
                   />
                 </div>
+
+
 
                 {/* Name */}
                 <h3 className="text-base font-semibold text-center mb-1 text-black line-clamp-2">
