@@ -66,7 +66,7 @@ export default function ProductGridClient({ products }: { products: Product[] })
       </div>
 
       {/* Product grid */}
-      <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
         {visibleProducts.length > 0 ? (
           visibleProducts.map((product) => (
            <Link
