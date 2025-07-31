@@ -181,7 +181,7 @@ export default function ProductPageContent({
   };
 
 return (
-  <div className="bg-white-gradient min-h-screen flex flex-col items-center justify-center pt-16 px-4 sm:px-6 md:px-10 pb-10 text-black">
+  <div className="bg-white-gradient min-h-screen flex flex-col items-center justify-center pt-16 px-4 sm:px-6 md:px-10 pb-10 text-black mt-20">
     {/* Product Section */}
     <div className="flex flex-col md:flex-row w-full gap-8">
       {/* Left: Image */}
