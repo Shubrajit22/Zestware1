@@ -1,38 +1,11 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import SearchBarWithResults from './search';
-import dynamic from 'next/dynamic';
-
-// Dynamically import the 3D viewer to avoid SSR issues
-const Uniform3D = dynamic(() => import('./ImageGallery'), {
-  ssr: false,
-});
-
-const supportsWebGL = (): boolean => {
-  if (typeof window === 'undefined') return false;
-  try {
-    const canvas = document.createElement('canvas');
-    return !!(
-      typeof WebGLRenderingContext !== 'undefined' &&
-      (canvas.getContext('webgl') || canvas.getContext('experimental-webgl'))
-    );
-  } catch {
-    return false;
-  }
-};
-
+import Image from 'next/image';
 
 const HeroSection = () => {
-  const [hasMounted, setHasMounted] = useState(false);
-  const [webglOk, setWebglOk] = useState(true);
-
-  useEffect(() => {
-    setHasMounted(true);
-    setWebglOk(supportsWebGL());
-  }, []);
-
   return (
     <section
       className="relative w-full text-white overflow-hidden pt-[88px] py-10"
@@ -59,8 +32,7 @@ const HeroSection = () => {
             className="text-gray-300 text-base sm:text-lg md:text-xl max-w-lg mx-auto md:mx-0"
           >
             Find the best, reliable, and high quality uniforms here. We focus on
-            product quality. Uniforms for almost all schools—so why wait?&nbsp;Order
-            now!
+            product quality. Uniforms for almost all schools—so why wait? Order now!
           </motion.p>
 
           <motion.div
@@ -80,9 +52,7 @@ const HeroSection = () => {
             <button
               className="px-6 py-3 sm:px-8 sm:py-4 text-base sm:text-lg rounded-full bg-white text-black hover:bg-yellow-300 transition font-semibold shadow-lg hover:cursor-pointer"
               onClick={() => {
-                document
-                  .getElementById('product-categories')
-                  ?.scrollIntoView({ behavior: 'smooth' });
+                document.getElementById('product-categories')?.scrollIntoView({ behavior: 'smooth' });
               }}
             >
               Shop Now
@@ -90,27 +60,23 @@ const HeroSection = () => {
           </motion.div>
         </div>
 
-        {/* RIGHT SIDE - GLB model only */}
+        {/* RIGHT SIDE: Image with motion */}
         <motion.div
-          initial={{ opacity: 0, x: 50 }}
-          animate={{ opacity: hasMounted ? 1 : 0, x: 0 }}
-          transition={{ duration: 0.8 }}
-          className="relative flex justify-center md:justify-end"
-        >
-          <div className="w-[260px] sm:w-[320px] md:w-[400px] lg:w-[480px]">
-            {hasMounted && webglOk ? (
-              <Uniform3D />
-            ) : hasMounted && !webglOk ? (
-              <div className="rounded-lg bg-gray-900/80 p-6 flex items-center justify-center h-[400px]">
-                <p className="text-center text-sm sm:text-base text-gray-300">
-                  3D view not supported on this device. Please use a modern browser
-                  with WebGL enabled.
-                </p>
-              </div>
-            ) : (
-              <div className="rounded-lg bg-gray-800 animate-pulse h-[400px]" />
-            )}
-          </div>
+  initial={{ opacity: 0, x: 50 }}
+  animate={{ opacity: 1, x: 0 }}
+  transition={{ duration: 0.8 }}
+  whileHover={{ scale: 1.05 }}
+  className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg ml-auto pr-4 md:pr-8"
+>
+
+          <Image
+            src="/images/customise.png"
+            alt="Customize illustration"
+            width={500}
+            height={600}
+            className="w-full h-auto object-contain drop-shadow-xl rounded-xl"
+            priority
+          />
         </motion.div>
       </div>
     </section>
