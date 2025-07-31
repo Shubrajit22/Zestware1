@@ -28,7 +28,7 @@ export default function RootLayout({
       <body className={`${poppins.variable} antialiased min-h-screen flex flex-col overflow-x-hidden`}>
         <SessionWrapper>
           <CartContextProvider>
-            <Navbar />
+            <Navbar/>
             <main className="flex-grow">
               {children}
               <Toaster position="top-center" reverseOrder={false} />

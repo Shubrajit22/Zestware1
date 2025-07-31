@@ -8,7 +8,7 @@ import Image from 'next/image';
 const HeroSection = () => {
   return (
     <section
-      className="relative w-full text-white overflow-hidden pt-[88px] py-10"
+      className="relative w-full text-white overflow-hidden pt-50 py-10"
       style={{ minHeight: 'calc(100vh - 88px)' }}
     >
       <div className="max-w-[90%] md:max-w-[80%] mx-auto grid grid-cols-1 md:grid-cols-2 items-start gap-12 md:gap-20 px-4 md:px-12 relative z-0">

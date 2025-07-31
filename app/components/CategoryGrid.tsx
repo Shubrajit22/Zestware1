@@ -1,7 +1,7 @@
-'use client'
+'use client';
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
-import Link from 'next/link'; // ✅ Add this
+import Link from 'next/link';
 
 type Category = {
   id: string;
@@ -39,23 +39,23 @@ export const CategoryGrid = () => {
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 p-4">
+    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-4 px-2 sm:px-4">
       {categories.map((cat) => {
-        const categorySlug = cat.name.toLowerCase(); // Converts 'Uniform' → 'uniform'
+        const categorySlug = cat.name.toLowerCase();
         return (
           <Link key={cat.id} href={`/categories/${categorySlug}`}>
             <div className="cursor-pointer bg-white rounded-xl shadow hover:shadow-lg transition duration-300 overflow-hidden">
-              <div className="flex items-center p-4">
+              <div className="flex flex-col items-center p-3 sm:p-4">
                 <Image
                   src={cat.imageUrl}
                   alt={cat.name}
-                  width={100}
-                  height={100}
-                  className="w-1/3 h-36 object-cover rounded-md"
+                  width={120}
+                  height={120}
+                  className="w-[100px] h-[100px] sm:w-[120px] sm:h-[120px] object-cover rounded-md"
                 />
-                <div className="ml-4">
-                  <h2 className="text-xl font-semibold capitalize">{cat.name}</h2>
-                  <p className="mt-2 text-sm text-gray-900">{cat.description}</p>
+                <div className="mt-3 text-center">
+                  <h2 className="text-base sm:text-lg font-semibold capitalize text-gray-800">{cat.name}</h2>
+                  <p className="mt-1 text-xs sm:text-sm text-gray-600 line-clamp-2">{cat.description}</p>
                 </div>
               </div>
             </div>
