@@ -1,5 +1,5 @@
 // app/most-selling/page.tsx
-
+export const dynamic = "force-dynamic";
 import { prisma } from '@/lib/prisma';
 import MostSelling from '../components/MostSelling';
 import { Product } from '@prisma/client';
