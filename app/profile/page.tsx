@@ -307,36 +307,6 @@ export default function ProfilePage() {
               </div>
             </div>
           )}
-
-          {selectedSection === 'admin' && isAdmin && (
-            <div className="bg-white p-6 rounded-lg shadow-lg">
-              <h1 className="text-2xl font-semibold mb-4">Admin Panel</h1>
-              <p className="text-gray-600">
-                Quick links:
-              </p>
-              <div className="mt-4 flex flex-wrap gap-4">
-                <button
-                  onClick={() => router.push('/admin/orders')}
-                  className="px-4 py-2 bg-gray-100 rounded-md hover:bg-gray-200 transition text-sm"
-                >
-                  Orders
-                </button>
-                <button
-                  onClick={() => router.push('/admin/products')}
-                  className="px-4 py-2 bg-gray-100 rounded-md hover:bg-gray-200 transition text-sm"
-                >
-                  Products
-                </button>
-                <button
-                  onClick={() => router.push('/admin/users')}
-                  className="px-4 py-2 bg-gray-100 rounded-md hover:bg-gray-200 transition text-sm"
-                >
-                  Users
-                </button>
-              </div>
-            </div>
-          )}
-
           {/* You can insert orders section similarly if needed */}
         </div>
       </div>
