@@ -29,7 +29,7 @@ export default async function ShoesPage() {
   }));
 
   return (
-    <div className="h-screen p-4 bg-white-gradient items-center">
+    <div className="min-h-screen p-4 bg-white-gradient items-center mt-10">
       <h1 className="text-3xl font-bold text-center mb-8 mt-10 text-black">Our Shoe Collection</h1>
       <ProductGridClient products={products} />
     </div>
